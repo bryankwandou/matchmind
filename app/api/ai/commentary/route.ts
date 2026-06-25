@@ -14,11 +14,16 @@ function sanitize(val: unknown, maxLen = 80): string {
   return val.replace(/[`<>{}]/g, "").slice(0, maxLen);
 }
 
-function validateBody(body: unknown): body is CommentaryRequest {
+// Accept both `matchContext` (canonical) and `match` (frontend alias)
+function resolveMatchContext(b: Record<string, unknown>) {
+  return (b.matchContext ?? b.match) as Record<string, unknown> | undefined;
+}
+
+function validateBody(body: unknown): boolean {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   if (!b.event || typeof b.event !== "object") return false;
-  if (!b.matchContext || typeof b.matchContext !== "object") return false;
+  if (!resolveMatchContext(b)) return false;
   const ev = b.event as Record<string, unknown>;
   if (!ALLOWED_EVENT_TYPES.has(ev.type as string)) return false;
   if (typeof ev.minute !== "number" || ev.minute < 0 || ev.minute > 130) return false;
@@ -26,7 +31,6 @@ function validateBody(body: unknown): body is CommentaryRequest {
 }
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 20 requests per IP per minute
   const ip = getClientIp(req);
   const { allowed, remaining, resetAt } = rateLimitCheck(ip);
 
@@ -55,29 +59,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid or missing fields" }, { status: 400 });
   }
 
-  // Sanitize all string fields before they reach the LLM prompt
+  const b = body as Record<string, unknown>;
+  const ev = b.event as Record<string, unknown>;
+  const ctx = resolveMatchContext(b)!;
+
+  // Derive score — accept either nested score object or flat homeScore/awayScore
+  const ctxScore = ctx.score as { home: number; away: number } | undefined;
+  const score = ctxScore ?? {
+    home: typeof ctx.homeScore === "number" ? ctx.homeScore : 0,
+    away: typeof ctx.awayScore === "number" ? ctx.awayScore : 0,
+  };
+
   const safe: CommentaryRequest = {
     event: {
-      type: body.event.type,
-      minute: body.event.minute,
-      team: sanitize(body.event.team),
-      player: sanitize(body.event.player),
-      detail: sanitize(body.event.detail),
-      oddsBefore: typeof body.event.oddsBefore === "number" ? body.event.oddsBefore : undefined,
-      oddsAfter: typeof body.event.oddsAfter === "number" ? body.event.oddsAfter : undefined,
-      score: body.event.score,
+      type: ev.type as CommentaryRequest["event"]["type"],
+      minute: ev.minute as number,
+      team: sanitize(ev.team),
+      player: sanitize(ev.player),
+      detail: sanitize(ev.detail),
+      oddsBefore: typeof ev.oddsBefore === "number" ? ev.oddsBefore : undefined,
+      oddsAfter: typeof ev.oddsAfter === "number" ? ev.oddsAfter : undefined,
+      score: ev.score as { home: number; away: number } | undefined,
     },
     matchContext: {
-      homeTeam: sanitize((body.matchContext as Record<string, unknown>).homeTeam),
-      awayTeam: sanitize((body.matchContext as Record<string, unknown>).awayTeam),
-      score: (body.matchContext as CommentaryRequest["matchContext"]).score,
-      minute: (body.matchContext as CommentaryRequest["matchContext"]).minute,
-      competition: sanitize((body.matchContext as Record<string, unknown>).competition),
+      homeTeam: sanitize(ctx.homeTeam),
+      awayTeam: sanitize(ctx.awayTeam),
+      score,
+      minute: typeof ctx.minute === "number" ? ctx.minute : (ev.minute as number),
+      competition: sanitize(ctx.competition) || "FIFA World Cup 2026",
     },
-    userTeam: sanitize(body.userTeam),
-    language: sanitize(body.language, 20),
-    pundtStyle: ALLOWED_PUNDIT_STYLES.has(body.pundtStyle as string)
-      ? (body.pundtStyle as "analyst" | "casual" | "stats")
+    userTeam: sanitize(b.userTeam),
+    language: sanitize(b.language, 20),
+    pundtStyle: ALLOWED_PUNDIT_STYLES.has(b.pundtStyle as string)
+      ? (b.pundtStyle as "analyst" | "casual" | "stats")
       : "casual",
   };
 

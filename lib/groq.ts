@@ -48,12 +48,19 @@ export async function generateCommentary(req: CommentaryRequest): Promise<string
     ? `The user supports ${userTeam}. Frame the analysis from their perspective.`
     : "";
 
-  const prompt = `You are a football pundit providing real-time match commentary.
+  const isQuestion = event.type === "goal" && event.player && event.player === event.detail;
+  const prompt = isQuestion
+    ? `You are a football analyst. A fan watching ${matchContext.homeTeam} ${matchContext.score.home}-${matchContext.score.away} ${matchContext.awayTeam} (${event.minute}', ${matchContext.competition}) asks:
+
+"${event.player}"
+
+Answer in 2-3 sentences. Be direct. No filler words. No emojis. Reference the current match state where relevant.`
+    : `You are a football pundit providing real-time match commentary.
 
 Match: ${matchContext.homeTeam} ${matchContext.score.home}-${matchContext.score.away} ${matchContext.awayTeam}
 Minute: ${event.minute}'
 Competition: ${matchContext.competition}
-Event: ${event.type.replace("_", " ")} — ${event.player || ""} (${event.team})
+Event: ${event.type.replace(/_/g, " ")} — ${event.player || ""} (${event.team})
 ${event.detail ? `Detail: ${event.detail}` : ""}
 ${oddsContext}
 ${teamAngle}

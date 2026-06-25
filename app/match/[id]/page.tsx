@@ -268,18 +268,18 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event: {
-            type: event.type === "red_card" ? "red_card" : event.type,
+            type: event.type,
             team: event.team === "home" ? match.homeTeam : match.awayTeam,
             player: event.player,
             minute: event.minute,
+            detail: event.detail,
           },
-          match: {
+          matchContext: {
             homeTeam: match.homeTeam,
             awayTeam: match.awayTeam,
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-            homeOdds: match.homeOdds,
-            awayOdds: match.awayOdds,
+            score: { home: match.homeScore, away: match.awayScore },
+            minute: match.minute,
+            competition: match.stage,
           },
           pundtStyle: aiStyle,
         }),
@@ -324,19 +324,18 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           event: {
             type: "goal",
             team: match.homeTeam,
-            player: "User question",
+            player: q,
             minute: match.minute,
+            detail: q,
           },
-          match: {
+          matchContext: {
             homeTeam: match.homeTeam,
             awayTeam: match.awayTeam,
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-            homeOdds: match.homeOdds,
-            awayOdds: match.awayOdds,
+            score: { home: match.homeScore, away: match.awayScore },
+            minute: match.minute,
+            competition: match.stage,
           },
           pundtStyle: aiStyle,
-          question: q,
         }),
       });
       const data = await res.json();
