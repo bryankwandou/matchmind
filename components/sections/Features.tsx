@@ -2,108 +2,133 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { TiltCard } from "../ui/TiltCard";
+import { SpotlightCard } from "../ui/BeamBorder";
 
 const FEATURES = [
   {
-    icon: "01",
-    title: "Odds explained, not just displayed",
-    body: "When Argentina drops from 2.10 to 1.45 after a goal, MatchMind tells you what that shift means for the game — not just that it happened.",
-    color: "var(--green)",
+    num: "01",
+    title: "Odds shifts explained in context",
+    body: "When Argentina drops from 2.10 to 1.45 after a goal, you get one sentence that tells you what that number means for the rest of the match — not just that it moved.",
+    accent: "var(--green)",
+    wide: false,
   },
   {
-    icon: "02",
-    title: "104 games, no match left unread",
-    body: "Group stage to final. Every match in the schedule gets the same treatment — live event tracking and AI analysis from kickoff to the final whistle.",
-    color: "#00c4ff",
+    num: "02",
+    title: "Every game in the schedule",
+    body: "Group stage, knockouts, final. All 104 matches get the same treatment. Open any match in progress and the analysis starts immediately.",
+    accent: "#00c4ff",
+    wide: false,
   },
   {
-    icon: "03",
-    title: "Pick your team, get their angle",
-    body: "Set your team and MatchMind frames every analysis from your side. A red card means something different depending on which bench you're sitting on.",
-    color: "var(--purple)",
+    num: "03",
+    title: "Built for your phone while the game is on TV",
+    body: "Dense information, fast to scan. No loading spinners. No account gates. The data updates without you touching anything.",
+    accent: "var(--purple)",
+    wide: true,
   },
   {
-    icon: "04",
-    title: "Under two seconds to your screen",
-    body: "Groq's inference runs fast enough that the analysis reaches you before the broadcast replay does. The commentary is there when you need it.",
-    color: "var(--orange)",
+    num: "04",
+    title: "Your team, your angle",
+    body: "Pick the side you support and every piece of analysis comes from that direction. A red card reads differently depending on which end of the pitch it happened on.",
+    accent: "var(--orange)",
+    wide: false,
   },
   {
-    icon: "05",
-    title: "No account required to watch",
-    body: "Open a match, start reading. No sign-up gate on the core experience. Connect a Solana wallet if you want to save preferences or unlock more depth.",
-    color: "var(--gold)",
-  },
-  {
-    icon: "06",
-    title: "Built for the second screen",
-    body: "Designed for your phone while the game is on the TV. Dense information, fast to scan, nothing in the way of the match.",
-    color: "var(--green)",
+    num: "05",
+    title: "Under two seconds from event to screen",
+    body: "Groq's inference runs fast enough that the commentary reaches you before the broadcast replay finishes. The analysis is there when the moment is still fresh.",
+    accent: "var(--gold)",
+    wide: false,
   },
 ];
 
-function FeatureCard({ feature, index }: { feature: typeof FEATURES[0]; index: number }) {
+function FeatureCard({ f, index }: { f: typeof FEATURES[0]; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 32 }}
+      initial={{ opacity: 0, y: 36 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -6, borderColor: "var(--border-2)" }}
-      style={{
-        padding: "28px",
-        borderRadius: "14px",
-        border: "1px solid var(--border)",
-        background: "var(--bg-card)",
-        cursor: "default",
-        transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 40px ${feature.color}18`;
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-      }}
+      transition={{ duration: 0.6, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+      style={{ gridColumn: f.wide ? "span 2" : "span 1" }}
+      className="feature-card-wrap"
     >
-      <div style={{
-        width: "36px",
-        height: "36px",
-        borderRadius: "8px",
-        background: `${feature.color}18`,
-        border: `1px solid ${feature.color}44`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "11px",
-        fontWeight: 800,
-        color: feature.color,
-        letterSpacing: "0.04em",
-        marginBottom: "20px",
-      }}>
-        {feature.icon}
-      </div>
+      <TiltCard intensity={8}>
+        <SpotlightCard
+          style={{
+            padding: "28px 28px 26px",
+            borderRadius: "14px",
+            border: "1px solid var(--border)",
+            background: "var(--bg-card)",
+            height: "100%",
+            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+          }}
+        >
+          <motion.div
+            whileHover={{ borderColor: `${f.accent}66`, boxShadow: `0 0 40px ${f.accent}18` }}
+            style={{ height: "100%", borderRadius: "12px" }}
+          >
+            {/* Number badge */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "20px",
+            }}>
+              <div style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "8px",
+                background: `${f.accent}14`,
+                border: `1px solid ${f.accent}44`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "11px",
+                fontWeight: 800,
+                color: f.accent,
+                letterSpacing: "0.04em",
+              }}>{f.num}</div>
 
-      <h3 style={{
-        fontSize: "15px",
-        fontWeight: 700,
-        color: "var(--text)",
-        marginBottom: "10px",
-        letterSpacing: "-0.02em",
-        lineHeight: 1.3,
-      }}>
-        {feature.title}
-      </h3>
+              {/* Animated line */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={inView ? { scaleX: 1 } : {}}
+                transition={{ duration: 0.8, delay: index * 0.07 + 0.3 }}
+                style={{
+                  flex: 1,
+                  height: "1px",
+                  background: `linear-gradient(to right, ${f.accent}44, transparent)`,
+                  transformOrigin: "left",
+                }}
+              />
+            </div>
 
-      <p style={{
-        fontSize: "13px",
-        color: "var(--text-2)",
-        lineHeight: 1.7,
-      }}>
-        {feature.body}
-      </p>
+            <h3 style={{
+              fontSize: f.wide ? "18px" : "15px",
+              fontWeight: 700,
+              color: "var(--text)",
+              marginBottom: "10px",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.3,
+            }}>
+              {f.title}
+            </h3>
+
+            <p style={{
+              fontSize: "13px",
+              color: "var(--text-2)",
+              lineHeight: 1.75,
+              maxWidth: f.wide ? "560px" : undefined,
+            }}>
+              {f.body}
+            </p>
+          </motion.div>
+        </SpotlightCard>
+      </TiltCard>
     </motion.div>
   );
 }
@@ -113,43 +138,53 @@ export default function Features() {
   const inView = useInView(ref, { once: true });
 
   return (
-    <section id="features" style={{ padding: "120px 24px", maxWidth: "1200px", margin: "0 auto" }}>
-      <div ref={ref} style={{ textAlign: "center", marginBottom: "64px" }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5 }}
-          style={{ fontSize: "12px", fontWeight: 700, color: "var(--green)", letterSpacing: "0.1em", marginBottom: "16px" }}
-        >
-          WHAT IT DOES
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
+    <section id="features" style={{ padding: "120px 24px" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div ref={ref} style={{ marginBottom: "60px" }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            style={{ fontSize: "11px", fontWeight: 800, color: "var(--green)", letterSpacing: "0.12em", marginBottom: "14px" }}
+          >
+            WHAT IT DOES
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1 }}
+            style={{
+              fontSize: "clamp(30px, 4vw, 50px)",
+              fontWeight: 900,
+              letterSpacing: "-0.04em",
+              lineHeight: 1.05,
+              color: "var(--text)",
+              maxWidth: "480px",
+            }}
+          >
+            More than a scoreboard
+          </motion.h2>
+        </div>
+
+        <div
+          className="features-grid"
           style={{
-            fontSize: "clamp(32px, 4vw, 52px)",
-            fontWeight: 900,
-            letterSpacing: "-0.04em",
-            lineHeight: 1.1,
-            color: "var(--text)",
-            maxWidth: "600px",
-            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "12px",
           }}
         >
-          More than a scoreboard
-        </motion.h2>
+          {FEATURES.map((f, i) => (
+            <FeatureCard key={f.num} f={f} index={i} />
+          ))}
+        </div>
       </div>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-        gap: "16px",
-      }}>
-        {FEATURES.map((f, i) => (
-          <FeatureCard key={f.icon} feature={f} index={i} />
-        ))}
-      </div>
+      <style>{`
+        @media (max-width: 700px) {
+          .features-grid { grid-template-columns: 1fr !important; }
+          .feature-card-wrap { grid-column: span 1 !important; }
+        }
+      `}</style>
     </section>
   );
 }

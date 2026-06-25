@@ -1,69 +1,91 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { ParticleField, GlowOrb } from "../ui/AnimatedBackground";
+import { AuroraBackground, SpotlightGrid } from "../ui/AuroraBackground";
+import { ParticleField } from "../ui/AnimatedBackground";
+import { MagneticButton } from "../ui/MagneticButton";
+import { Globe3D, RadarRings } from "../ui/Sphere3D";
+import { WordFadeIn } from "../ui/TextAnimations";
 
-const LIVE_EVENTS = [
-  { team: "ARG", player: "Messi", type: "GOAL", minute: 34, score: "1-0" },
-  { team: "ESP", player: "Yamal", type: "GOAL", minute: 67, score: "2-1" },
-  { team: "FRA", player: "Tchouameni", type: "RED CARD", minute: 52, score: "0-1" },
-  { team: "BRA", player: "Vinicius Jr", type: "GOAL", minute: 88, score: "2-1" },
-  { team: "GER", player: "Müller", type: "GOAL", minute: 12, score: "1-0" },
+const EVENTS = [
+  { type: "GOAL", team: "ARG", player: "L. Messi", minute: 34, score: "1 — 0", oddsShift: "2.10 → 1.45", color: "var(--green)" },
+  { type: "RED CARD", team: "FRA", player: "Tchouameni", minute: 52, score: "1 — 0", oddsShift: "draw 3.40 → 5.20", color: "var(--orange)" },
+  { type: "GOAL", team: "ESP", player: "L. Yamal", minute: 67, score: "2 — 1", oddsShift: "1.80 → 1.22", color: "var(--green)" },
+  { type: "GOAL", team: "BRA", player: "Vinicius Jr", minute: 88, score: "2 — 1", oddsShift: "1.55 → 1.10", color: "var(--green)" },
+  { type: "PENALTY", team: "GER", player: "T. Müller", minute: 73, score: "1 — 1", oddsShift: "draw 3.20 → 2.80", color: "#f5c842" },
 ];
 
-const AI_RESPONSES = [
-  "Argentina's market moved hard after this — from 2.10 down to 1.45. With Messi in this form, the books have all but settled the result.",
-  "Yamal's second goal in 23 minutes. Spain's odds to win dropped from 1.80 to 1.22. At this point the market's just pricing in time.",
-  "Ten men for 38 minutes. France's draw odds lengthened from 3.40 to 5.20. Their defensive shape will determine everything from here.",
-  "Vinicius with the winner in the 88th. Market barely had time to react — Brazil held at 1.55 all half, now settled at 1.10.",
-  "Early goal from Germany. Their pre-match odds were 2.30 and the market has tightened to 1.62 already.",
+const AI_LINES = [
+  "Messi's second tonight. Argentina dropped from 2.10 to 1.45 — the market has essentially settled this.",
+  "Ten men and 38 minutes left. France's draw odds lengthened from 3.40 to 5.20 immediately after.",
+  "Yamal's second in 23 minutes. Spain's win odds compressed to 1.22. The books have stopped arguing.",
+  "Vinicius in the 88th. Market barely had time to react — Brazil held at 1.55 all half, now at 1.10.",
+  "Penalty converted. Germany's draw odds tighten. The shape of this game just changed entirely.",
 ];
 
-function LiveCard({ event, response, isVisible }: {
-  event: typeof LIVE_EVENTS[0];
-  response: string;
-  isVisible: boolean;
+function EventCard({ event, ai, visible }: {
+  event: typeof EVENTS[0];
+  ai: string;
+  visible: boolean;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40, rotateY: -15 }}
-      animate={isVisible ? { opacity: 1, x: 0, rotateY: 0 } : { opacity: 0, x: 40, rotateY: -15 }}
-      exit={{ opacity: 0, x: -40, rotateY: 15 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 24, scale: 0.96 }}
+      animate={visible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: -20, scale: 0.96 }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-2)",
+        background: "rgba(17,17,17,0.92)",
+        border: `1px solid ${event.color}33`,
         borderRadius: "16px",
-        padding: "20px 24px",
-        maxWidth: "380px",
+        padding: "20px 22px",
+        backdropFilter: "blur(20px)",
+        boxShadow: `0 0 40px ${event.color}18, 0 24px 60px rgba(0,0,0,0.5)`,
         width: "100%",
+        maxWidth: "360px",
       }}
     >
-      {/* Event header */}
+      {/* Top row */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-        <div style={{
-          padding: "4px 10px",
-          borderRadius: "6px",
-          background: event.type === "GOAL" ? "var(--green-dim)" : "var(--orange-dim)",
-          color: event.type === "GOAL" ? "var(--green)" : "var(--orange)",
-          fontSize: "11px",
-          fontWeight: 700,
-          letterSpacing: "0.08em",
-        }}>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          style={{
+            padding: "4px 10px",
+            borderRadius: "6px",
+            background: `${event.color}18`,
+            border: `1px solid ${event.color}44`,
+            fontSize: "10px",
+            fontWeight: 800,
+            color: event.color,
+            letterSpacing: "0.1em",
+          }}
+        >
           {event.type}
+        </motion.div>
+        <span style={{ fontSize: "12px", color: "var(--text-3)" }}>{event.minute}&apos;</span>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
+          <span className="live-dot" style={{ width: "6px", height: "6px" }} />
+          <span style={{ fontSize: "11px", color: "var(--text-3)", letterSpacing: "0.06em" }}>LIVE</span>
         </div>
-        <span style={{ fontSize: "13px", color: "var(--text-2)" }}>{event.minute}&apos;</span>
-        <span style={{ fontSize: "13px", color: "var(--text-2)", marginLeft: "auto" }}>
-          Score: <strong style={{ color: "var(--text)" }}>{event.score}</strong>
-        </span>
       </div>
 
-      {/* Player */}
-      <p style={{ fontSize: "18px", fontWeight: 700, marginBottom: "14px", letterSpacing: "-0.02em" }}>
-        {event.player}
-        <span style={{ color: "var(--text-3)", fontWeight: 400, fontSize: "14px" }}> · {event.team}</span>
-      </p>
+      {/* Score */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+        <div>
+          <p style={{ fontSize: "20px", fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>
+            {event.player}
+          </p>
+          <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>{event.team}</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ fontSize: "22px", fontWeight: 900, fontVariantNumeric: "tabular-nums", color: event.color }}>
+            {event.score}
+          </p>
+          <p style={{ fontSize: "11px", color: "var(--text-3)", marginTop: "2px" }}>odds: {event.oddsShift}</p>
+        </div>
+      </div>
 
       {/* AI response */}
       <div style={{
@@ -74,10 +96,10 @@ function LiveCard({ event, response, isVisible }: {
         alignItems: "flex-start",
       }}>
         <div style={{
-          width: "24px",
-          height: "24px",
-          borderRadius: "6px",
-          background: "linear-gradient(135deg, var(--green), #00c4ff)",
+          width: "26px",
+          height: "26px",
+          borderRadius: "7px",
+          background: "linear-gradient(135deg, var(--green) 0%, #00c4ff 100%)",
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
@@ -85,11 +107,17 @@ function LiveCard({ event, response, isVisible }: {
           fontSize: "11px",
           fontWeight: 900,
           color: "#000",
-          marginTop: "2px",
+          marginTop: "1px",
+          boxShadow: "0 0 12px var(--green-glow)",
         }}>M</div>
-        <p style={{ fontSize: "13px", lineHeight: 1.6, color: "var(--text-2)" }}>
-          {response}
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          style={{ fontSize: "13px", color: "var(--text-2)", lineHeight: 1.65 }}
+        >
+          {ai}
+        </motion.p>
       </div>
     </motion.div>
   );
@@ -97,18 +125,27 @@ function LiveCard({ event, response, isVisible }: {
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.94]);
 
+  // Cycle events
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % LIVE_EVENTS.length);
-    }, 3500);
+      setVisible(false);
+      setTimeout(() => {
+        setActiveIdx((prev) => (prev + 1) % EVENTS.length);
+        setVisible(true);
+      }, 400);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const event = EVENTS[activeIdx];
 
   return (
     <section
@@ -117,184 +154,209 @@ export default function Hero() {
         position: "relative",
         minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        paddingTop: "80px",
-        paddingBottom: "80px",
+        padding: "100px 24px 80px",
       }}
     >
-      {/* Background layers */}
+      <AuroraBackground />
+      <SpotlightGrid />
       <ParticleField />
-      <GlowOrb color="#00e87a" size={600} x="20%" y="30%" opacity={0.08} />
-      <GlowOrb color="#7c3aed" size={500} x="80%" y="60%" opacity={0.08} />
-      <GlowOrb color="#00c4ff" size={400} x="60%" y="20%" opacity={0.06} />
-
-      {/* Dot grid */}
-      <div className="dot-bg" style={{
-        position: "absolute",
-        inset: 0,
-        opacity: 0.3,
-        pointerEvents: "none",
-      }} />
 
       <motion.div
-        style={{ y, opacity, position: "relative", zIndex: 10, width: "100%", maxWidth: "1200px", padding: "0 24px" }}
+        style={{
+          y, opacity, scale,
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          maxWidth: "1280px",
+          margin: "0 auto",
+        }}
       >
-        {/* Live badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}
-        >
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "7px 16px",
-            borderRadius: "100px",
-            border: "1px solid var(--border-2)",
-            background: "rgba(255,255,255,0.03)",
-            fontSize: "12px",
-            color: "var(--text-2)",
-          }}>
-            <span className="live-dot" />
-            <span>104 World Cup matches · TxLINE live data</span>
-          </div>
-        </motion.div>
-
-        {/* Headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          style={{ textAlign: "center", marginBottom: "24px" }}
-        >
-          <h1 style={{
-            fontSize: "clamp(42px, 7vw, 88px)",
-            fontWeight: 900,
-            lineHeight: 1.0,
-            letterSpacing: "-0.04em",
-            color: "var(--text)",
-            marginBottom: "16px",
-          }}>
-            Your match,
-            <br />
-            <span className="gradient-text">explained live.</span>
-          </h1>
-          <p style={{
-            fontSize: "clamp(16px, 2vw, 20px)",
-            color: "var(--text-2)",
-            maxWidth: "560px",
-            margin: "0 auto",
-            lineHeight: 1.6,
-            fontWeight: 400,
-          }}>
-            MatchMind reads TxLINE data during every World Cup game — goals, red cards, odds shifts — and tells you what they mean in plain language, as they happen.
-          </p>
-        </motion.div>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          style={{
-            display: "flex",
-            gap: "12px",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginBottom: "72px",
-          }}
-        >
-          <motion.a
-            href="#live-matches"
-            whileHover={{ scale: 1.04, boxShadow: "0 0 40px var(--green-glow)" }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: "14px 28px",
-              borderRadius: "10px",
-              fontSize: "15px",
-              fontWeight: 700,
-              textDecoration: "none",
-              color: "#000",
-              background: "var(--green)",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Open a live match
-          </motion.a>
-          <motion.a
-            href="#how-it-works"
-            whileHover={{ scale: 1.04, borderColor: "var(--border-2)" }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: "14px 28px",
-              borderRadius: "10px",
-              fontSize: "15px",
-              fontWeight: 600,
-              textDecoration: "none",
-              color: "var(--text-2)",
-              border: "1px solid var(--border)",
-              background: "transparent",
-              letterSpacing: "-0.01em",
-              transition: "border-color 0.2s",
-            }}
-          >
-            See how it works
-          </motion.a>
-        </motion.div>
-
-        {/* Live demo card */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          style={{ display: "flex", justifyContent: "center" }}
-        >
-          <div style={{ position: "relative" }}>
-            {/* Glow ring */}
-            <div style={{
-              position: "absolute",
-              inset: "-1px",
-              borderRadius: "17px",
-              background: "linear-gradient(135deg, var(--green)44, var(--purple)44)",
-              zIndex: -1,
-              filter: "blur(1px)",
-            }} />
-            <LiveCard
-              event={LIVE_EVENTS[activeIndex]}
-              response={AI_RESPONSES[activeIndex]}
-              isVisible
-            />
-          </div>
-        </motion.div>
-
-        {/* Event indicator dots */}
         <div style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "6px",
-          marginTop: "20px",
-        }}>
-          {LIVE_EVENTS.map((_, i) => (
-            <motion.button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              animate={{ width: i === activeIndex ? 20 : 6 }}
-              transition={{ duration: 0.3 }}
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "60px",
+          alignItems: "center",
+        }}
+          className="hero-grid"
+        >
+          {/* LEFT — text */}
+          <div>
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              style={{ marginBottom: "28px" }}
+            >
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "7px 14px",
+                borderRadius: "100px",
+                border: "1px solid var(--border-2)",
+                background: "rgba(0,232,122,0.04)",
+                fontSize: "12px",
+                color: "var(--text-3)",
+              }}>
+                <span className="live-dot" />
+                <span>104 matches · TxLINE live feed · World Cup 2026</span>
+              </div>
+            </motion.div>
+
+            {/* Headline */}
+            <h1 style={{
+              fontSize: "clamp(40px, 5.5vw, 76px)",
+              fontWeight: 900,
+              lineHeight: 1.0,
+              letterSpacing: "-0.04em",
+              marginBottom: "20px",
+            }}>
+              <WordFadeIn text="Your match," delay={0.15} style={{ display: "block", color: "var(--text)" }} />
+              <span style={{ display: "block" }}>
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.4 }}
+                  style={{
+                    background: "linear-gradient(135deg, var(--green) 0%, #00c4ff 50%, var(--purple) 100%)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  explained live.
+                </motion.span>
+              </span>
+            </h1>
+
+            {/* Sub */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
               style={{
-                height: "6px",
-                borderRadius: "3px",
-                background: i === activeIndex ? "var(--green)" : "var(--border-2)",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
+                fontSize: "17px",
+                color: "var(--text-2)",
+                lineHeight: 1.7,
+                marginBottom: "36px",
+                maxWidth: "480px",
               }}
-            />
-          ))}
+            >
+              MatchMind reads TxLINE data across all 104 World Cup games — goals, red cards, odds movements — and tells you what each one means the moment it happens.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.65 }}
+              style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "48px" }}
+            >
+              <MagneticButton href="#live-matches">
+                <motion.span
+                  whileHover={{ boxShadow: "0 0 60px var(--green-glow)" }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "14px 28px",
+                    borderRadius: "10px",
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    color: "#000",
+                    background: "var(--green)",
+                    letterSpacing: "-0.01em",
+                    textDecoration: "none",
+                    transition: "box-shadow 0.3s ease",
+                  }}
+                >
+                  <span className="live-dot" style={{ background: "#000" }} />
+                  Watch a live match
+                </motion.span>
+              </MagneticButton>
+
+              <MagneticButton href="#how-it-works">
+                <motion.span
+                  whileHover={{ borderColor: "var(--border-2)", color: "var(--text)" }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "14px 24px",
+                    borderRadius: "10px",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    color: "var(--text-2)",
+                    border: "1px solid var(--border)",
+                    background: "transparent",
+                    textDecoration: "none",
+                    transition: "border-color 0.2s, color 0.2s",
+                  }}
+                >
+                  How it works
+                </motion.span>
+              </MagneticButton>
+            </motion.div>
+
+            {/* Social proof */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              style={{ display: "flex", gap: "32px" }}
+            >
+              {[
+                { num: "104", label: "matches" },
+                { num: "<2s", label: "AI response" },
+                { num: "50+", label: "bookmakers" },
+              ].map(({ num, label }) => (
+                <div key={label}>
+                  <p style={{ fontSize: "22px", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>{num}</p>
+                  <p style={{ fontSize: "11px", color: "var(--text-3)", marginTop: "2px" }}>{label}</p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* RIGHT — live card + globe */}
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
+            {/* Globe 3D */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{ position: "relative", marginBottom: "-60px" }}
+            >
+              <Globe3D size={240} />
+              <RadarRings color="var(--green)" />
+            </motion.div>
+
+            {/* Event card */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              style={{ width: "100%", maxWidth: "380px", position: "relative", zIndex: 2 }}
+            >
+              <EventCard event={event} ai={AI_LINES[activeIdx]} visible={visible} />
+            </motion.div>
+
+            {/* Dot indicators */}
+            <div style={{ display: "flex", gap: "6px", marginTop: "16px", justifyContent: "center" }}>
+              {EVENTS.map((_, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => { setVisible(false); setTimeout(() => { setActiveIdx(i); setVisible(true); }, 300); }}
+                  animate={{ width: i === activeIdx ? 20 : 6, background: i === activeIdx ? "var(--green)" : "var(--border-2)" }}
+                  transition={{ duration: 0.3 }}
+                  style={{ height: "6px", borderRadius: "3px", border: "none", cursor: "pointer", padding: 0 }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -304,10 +366,16 @@ export default function Hero() {
         bottom: 0,
         left: 0,
         right: 0,
-        height: "200px",
+        height: "180px",
         background: "linear-gradient(to bottom, transparent, var(--bg))",
         pointerEvents: "none",
       }} />
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+        }
+      `}</style>
     </section>
   );
 }
