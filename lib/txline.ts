@@ -1,13 +1,15 @@
 const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline.txodds.com/api";
 const TXLINE_KEY = process.env.TXLINE_API_KEY ?? "";
 
-async function txFetch<T>(path: string): Promise<T> {
+export const HAS_TXLINE_KEY = !!process.env.TXLINE_API_KEY;
+
+async function txFetch<T>(path: string, ttl = 30): Promise<T> {
   const res = await fetch(`${TXLINE_BASE}${path}`, {
     headers: {
       Authorization: `Bearer ${TXLINE_KEY}`,
       "Content-Type": "application/json",
     },
-    next: { revalidate: 30 },
+    next: { revalidate: ttl },
   });
 
   if (!res.ok) throw new Error(`TxLINE ${res.status}: ${path}`);
@@ -41,20 +43,36 @@ export type TxEvent = {
   timestamp: string;
 };
 
+// /api/fixtures/snapshot — all available World Cup fixtures
+export async function getFixturesSnapshot(): Promise<TxMatch[]> {
+  return txFetch<TxMatch[]>("/fixtures/snapshot", 60);
+}
+
+// /api/scores/snapshot — current scores for all live matches
+export async function getScoresSnapshot(): Promise<TxMatch[]> {
+  return txFetch<TxMatch[]>("/scores/snapshot", 10);
+}
+
+// /api/odds/live/{fixtureId} — real-time odds for a specific fixture
+export async function getLiveOdds(fixtureId: string) {
+  return txFetch(`/odds/live/${fixtureId}`, 5);
+}
+
+// Combined: get all matches (fixtures with score overlay)
 export async function getLiveMatches(): Promise<TxMatch[]> {
-  return txFetch<TxMatch[]>("/worldcup/matches/live");
+  return getFixturesSnapshot();
 }
 
 export async function getMatchEvents(matchId: string): Promise<TxEvent[]> {
-  return txFetch<TxEvent[]>(`/worldcup/matches/${matchId}/events`);
+  return txFetch<TxEvent[]>(`/scores/history/${matchId}`, 30);
 }
 
 export async function getMatchOdds(matchId: string) {
-  return txFetch(`/worldcup/matches/${matchId}/odds`);
+  return getLiveOdds(matchId);
 }
 
 export async function getAllMatches(): Promise<TxMatch[]> {
-  return txFetch<TxMatch[]>("/worldcup/matches");
+  return getFixturesSnapshot();
 }
 
 // Mock data for demo/dev when API key is not set

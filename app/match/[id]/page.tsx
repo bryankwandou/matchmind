@@ -239,11 +239,12 @@ function CommentaryBubble({ msg }: { msg: CommentaryMessage }) {
 
 export default function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [match] = useState<MatchData>(MOCK_MATCH);
+  const [match, setMatch] = useState<MatchData>(MOCK_MATCH);
   const [commentary, setCommentary] = useState<CommentaryMessage[]>([]);
   const [aiStyle, setAiStyle] = useState<"analyst" | "casual" | "stats">("analyst");
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [liveConnected, setLiveConnected] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   function scrollChat() {
@@ -352,6 +353,55 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  // SSE real-time stream connection
+  useEffect(() => {
+    const es = new EventSource("/api/scores/stream");
+
+    es.addEventListener("heartbeat", () => {
+      setLiveConnected(true);
+    });
+
+    es.onmessage = (e) => {
+      setLiveConnected(true);
+      try {
+        const data = JSON.parse(e.data);
+        // Only update if this event matches our fixture
+        if (!data.fixtureId || data.fixtureId !== id) return;
+
+        // Update score if present
+        if (data.score) {
+          setMatch((prev) => ({
+            ...prev,
+            homeScore: data.score.home ?? prev.homeScore,
+            awayScore: data.score.away ?? prev.awayScore,
+            minute: data.minute ?? prev.minute,
+            status: data.status ?? prev.status,
+          }));
+        }
+
+        // Trigger commentary for new goal/key events
+        if (data.event?.type === "goal" || data.event?.type === "red_card") {
+          const syntheticEvent: MatchEvent = {
+            id: data.id ?? String(Date.now()),
+            type: data.event.type as MatchEvent["type"],
+            team: data.event.team === match.homeTeam ? "home" : "away",
+            player: data.event.player ?? "Player",
+            minute: data.minute ?? match.minute,
+            detail: data.event.detail,
+          };
+          setMatch((prev) => ({ ...prev, events: [...prev.events, syntheticEvent] }));
+          triggerCommentary(syntheticEvent);
+        }
+      } catch {
+        // ignore parse errors
+      }
+    };
+
+    es.onerror = () => setLiveConnected(false);
+
+    return () => es.close();
+  }, [id]);
+
   // Auto-load commentary for last event on mount
   useEffect(() => {
     const lastGoal = [...match.events].reverse().find((e) => e.type === "goal" || e.type === "penalty");
@@ -430,6 +480,16 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                   {match.status === "live" ? `${match.minute}'` : match.status.toUpperCase()}
                 </span>
                 <span style={{ fontSize: "12px", color: "var(--text-3)" }}>· {match.stage}</span>
+                {liveConnected && (
+                  <span style={{
+                    fontSize: "9px", fontWeight: 700,
+                    color: "var(--green)", background: "rgba(0,232,122,0.1)",
+                    border: "1px solid rgba(0,232,122,0.25)",
+                    padding: "1px 6px", borderRadius: "99px", letterSpacing: "0.06em",
+                  }}>
+                    LIVE STREAM
+                  </span>
+                )}
               </div>
 
               {/* Odds bar */}

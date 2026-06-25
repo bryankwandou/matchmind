@@ -5,6 +5,7 @@ import Features from "@/components/sections/Features";
 import HowItWorks from "@/components/sections/HowItWorks";
 import AIDemoSection from "@/components/sections/AIDemoSection";
 import Stats from "@/components/sections/Stats";
+import Monetization from "@/components/sections/Monetization";
 import CTA from "@/components/sections/CTA";
 import Footer from "@/components/Footer";
 
@@ -18,6 +19,7 @@ export default function Home() {
       <Features />
       <HowItWorks />
       <AIDemoSection />
+      <Monetization />
       <CTA />
       <Footer />
     </main>
