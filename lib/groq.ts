@@ -1,8 +1,10 @@
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let _groq: Groq | null = null;
+function getGroq(): Groq {
+  if (!_groq) _groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? "" });
+  return _groq;
+}
 
 export type MatchEvent = {
   type: "goal" | "red_card" | "yellow_card" | "odds_shift" | "substitution" | "penalty" | "var";
@@ -64,7 +66,7 @@ Rules:
 - Write in plain, direct English
 - Start with the fact, then the meaning`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 200,
@@ -85,7 +87,7 @@ export async function generateMatchPreview(
 Odds: ${homeTeam} ${homeOdds} | Draw ${drawOdds} | ${awayTeam} ${awayOdds}.
 Be direct. No filler words. No emojis. Focus on what the odds tell us about how the market sees this game.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 120,
@@ -95,4 +97,4 @@ Be direct. No filler words. No emojis. Focus on what the odds tell us about how 
   return completion.choices[0]?.message?.content ?? "";
 }
 
-export { groq };
+export { getGroq as groq };
