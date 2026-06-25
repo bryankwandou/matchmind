@@ -1,14 +1,41 @@
 const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline.txodds.com/api";
-const TXLINE_KEY = process.env.TXLINE_API_KEY ?? "";
+const TXLINE_KEY  = process.env.TXLINE_API_KEY ?? "";
 
 export const HAS_TXLINE_KEY = !!process.env.TXLINE_API_KEY;
 
+// Guest JWT — refreshed lazily, cached until close to expiry
+let _guestJwt: string | null = null;
+let _guestJwtAt = 0;
+const JWT_TTL_MS = 24 * 60 * 60 * 1000; // refresh every 24 hours (JWT lasts 30 days)
+
+async function getGuestJwt(): Promise<string> {
+  if (_guestJwt && Date.now() - _guestJwtAt < JWT_TTL_MS) return _guestJwt;
+  try {
+    const r = await fetch("https://txline.txodds.com/auth/guest/start", { method: "POST" });
+    const body = await r.json();
+    _guestJwt = (body.token as string) ?? "";
+    _guestJwtAt = Date.now();
+  } catch {
+    _guestJwt = "";
+  }
+  return _guestJwt ?? "";
+}
+
 async function txFetch<T>(path: string, ttl = 30): Promise<T> {
+  const jwt = await getGuestJwt();
+  // Per TxLINE docs: Authorization: Bearer <guest_jwt>, X-Api-Token: <activated_token>
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(jwt && { Authorization: `Bearer ${jwt}` }),
+    ...(TXLINE_KEY && { "X-Api-Token": TXLINE_KEY }),
+  };
+  // Fallback: if no guest JWT, use API key as bearer (some endpoints accept this)
+  if (!jwt && TXLINE_KEY) {
+    headers["Authorization"] = `Bearer ${TXLINE_KEY}`;
+  }
+
   const res = await fetch(`${TXLINE_BASE}${path}`, {
-    headers: {
-      Authorization: `Bearer ${TXLINE_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     next: { revalidate: ttl },
   });
 

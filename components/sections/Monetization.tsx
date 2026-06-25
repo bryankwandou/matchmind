@@ -183,7 +183,6 @@ export default function Monetization() {
                 width: "100%",
                 padding: "11px",
                 borderRadius: "9px",
-                border: "none",
                 background: tier.ctaBg,
                 color: tier.ctaColor,
                 fontSize: "13px",
