@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import ConnectWallet from "@/components/ui/ConnectWallet";
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -80,9 +81,10 @@ export default function Navigation() {
         </div>
 
         {/* CTA */}
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <ConnectWallet />
           <motion.a
-            href="#live-matches"
+            href="/match"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             style={{

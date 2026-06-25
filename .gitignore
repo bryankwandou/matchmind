@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+scripts/.txline-wallet.json
+scripts/.txline-token.txt
+scripts/.txline-txsig.txt
+scripts/.txline-status.json
+.txline-*.txt
