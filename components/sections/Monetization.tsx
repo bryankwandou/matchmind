@@ -10,12 +10,12 @@ const TIERS = [
     period: "forever",
     color: "var(--text-3)",
     features: [
-      "3 live matches per day",
-      "60-second delayed commentary",
-      "Basic stats view",
-      "Mobile & web access",
+      "Three live ties a day",
+      "Reads on a 60-second delay",
+      "Core stats panel",
+      "Phone and desktop",
     ],
-    cta: "Start free",
+    cta: "Start here",
     ctaBg: "rgba(255,255,255,0.06)",
     ctaColor: "var(--text)",
     highlight: false,
@@ -26,13 +26,13 @@ const TIERS = [
     period: "per match",
     color: "var(--green)",
     features: [
-      "Unlimited match access",
-      "Real-time AI commentary",
-      "All 3 analysis styles",
-      "Odds movement alerts",
-      "Full event timeline",
+      "Every tie, no cap",
+      "Reads with no delay",
+      "All three tones of voice",
+      "Pings when the price drifts",
+      "The full event timeline",
     ],
-    cta: "Buy match pass",
+    cta: "Grab a pass",
     ctaBg: "var(--green)",
     ctaColor: "#000",
     highlight: true,
@@ -43,13 +43,13 @@ const TIERS = [
     period: "entire World Cup",
     color: "#7c3aed",
     features: [
-      "All 64 WC matches",
-      "Priority AI responses",
-      "Custom notification rules",
-      "Historical replay access",
-      "API access (beta)",
+      "All 104 ties, start to final",
+      "Front-of-queue reads",
+      "Alert rules you set yourself",
+      "Replay any past match",
+      "API keys (beta)",
     ],
-    cta: "Get full access",
+    cta: "Take the lot",
     ctaBg: "#7c3aed",
     ctaColor: "#fff",
     highlight: false,
@@ -57,9 +57,9 @@ const TIERS = [
 ];
 
 const B2B = [
-  { label: "Sports media embeds", desc: "White-label commentary widget for publishers" },
-  { label: "Betting platform API", desc: "Real-time AI context alongside odds data" },
-  { label: "Broadcaster tools", desc: "On-screen graphics and automated highlight reels" },
+  { label: "Embeds for sports media", desc: "A commentary widget publishers can brand as their own" },
+  { label: "API for betting sites", desc: "Plain-language context sitting next to the price feed" },
+  { label: "Kit for broadcasters", desc: "On-screen cards and highlight cuts put together for you" },
 ];
 
 export default function Monetization() {
@@ -92,7 +92,7 @@ export default function Monetization() {
           display: "block",
           marginBottom: "12px",
         }}>
-          Business model
+How it pays
         </span>
         <h2 style={{
           fontSize: "clamp(28px, 4vw, 44px)",
@@ -102,7 +102,7 @@ export default function Monetization() {
           lineHeight: 1.1,
           marginBottom: "16px",
         }}>
-          Built to grow with the game
+          Earns its keep two ways
         </h2>
         <p style={{
           fontSize: "16px",
@@ -111,8 +111,8 @@ export default function Monetization() {
           margin: "0 auto",
           lineHeight: 1.6,
         }}>
-          Fan-direct subscriptions cover the base. B2B licensing scales it.
-          Both ride TxLINE's verified data layer.
+          Passes bought by fans pay the rent. Licensing to other firms is where
+          it grows. Both sit on the same TxLINE data nobody can fake.
         </p>
       </motion.div>
 
@@ -216,10 +216,10 @@ export default function Monetization() {
               Enterprise & B2B
             </p>
             <h3 style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: "10px" }}>
-              License the data layer
+              Rent the data layer
             </h3>
             <p style={{ fontSize: "14px", color: "var(--text-2)", lineHeight: 1.6 }}>
-              TxLINE&apos;s on-chain verification makes MatchMind data trustable as a source of truth for betting, media, and broadcast integrations.
+              Because TxLINE signs its records on-chain, a betting desk, a newsroom, or a broadcaster can lean on MatchMind output and know the underlying numbers hold up.
             </p>
           </div>
           <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: "12px" }}>

@@ -59,7 +59,7 @@ export default function CTA() {
             }}
           >
             <span className="live-dot" />
-            Matches running right now
+Ties in play this minute
           </motion.div>
 
           <h2 style={{
@@ -70,7 +70,7 @@ export default function CTA() {
             color: "var(--text)",
             marginBottom: "20px",
           }}>
-            Open the first match.
+            Pull up a match.
             <br />
             <span style={{
               background: "linear-gradient(135deg, var(--green) 0%, #00c4ff 50%, var(--purple) 100%)",
@@ -78,7 +78,7 @@ export default function CTA() {
               backgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}>
-              See what you have been missing.
+              Notice what slipped past you.
             </span>
           </h2>
 
@@ -90,7 +90,7 @@ export default function CTA() {
             maxWidth: "480px",
             margin: "0 auto 40px",
           }}>
-            No sign-up. No payment. Pick a match that is running right now and watch it work from the first event.
+No account. No card. Tap a tie that is already underway and follow it from the very first whistle.
           </p>
 
           {/* CTA buttons */}
@@ -128,7 +128,7 @@ export default function CTA() {
                   }}
                 />
                 <span className="live-dot" style={{ background: "#000" }} />
-                Open a live match
+                Pull up a live tie
               </motion.span>
             </MagneticButton>
 

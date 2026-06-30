@@ -537,7 +537,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                 ))}
               </div>
               <span style={{ fontSize: "11px", color: "var(--text-3)", flex: 1, textAlign: "center" }}>
-                MatchMind AI Commentary
+                MatchMind · live read
               </span>
               <div style={{ display: "flex", gap: "4px" }}>
                 {AI_STYLE_OPTIONS.map((opt) => (
@@ -600,7 +600,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
 
               {commentary.length === 0 && !loading && (
                 <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-3)", fontSize: "12px" }}>
-                  Click any event on the right to get analysis
+                  Tap a moment on the right to read it back
                 </div>
               )}
             </div>
@@ -612,7 +612,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendQuestion()}
-                  placeholder="Ask about this match..."
+                  placeholder="Ask anything about this tie..."
                   style={{
                     flex: 1,
                     background: "var(--bg-3)",
@@ -662,7 +662,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
               alignItems: "center",
               justifyContent: "space-between",
             }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-2)" }}>MATCH EVENTS</span>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-2)" }}>WHAT HAPPENED</span>
               <span style={{ fontSize: "10px", color: "var(--text-3)" }}>Click to analyse</span>
             </div>
 
