@@ -8,36 +8,36 @@ import { SpotlightCard } from "../ui/BeamBorder";
 const FEATURES = [
   {
     num: "01",
-    title: "Odds shifts explained in context",
-    body: "When Argentina drops from 2.10 to 1.45 after a goal, you get one sentence that tells you what that number means for the rest of the match — not just that it moved.",
+    title: "Price moves that come with a reason",
+    body: "A goal pushes Argentina from 2.10 to 1.45. Instead of a bare number, you read a short line that says what the shift does to the rest of the night — settled, swung, or still open.",
     accent: "var(--green)",
     wide: false,
   },
   {
     num: "02",
-    title: "Every game in the schedule",
-    body: "Group stage, knockouts, final. All 104 matches get the same treatment. Open any match in progress and the analysis starts immediately.",
+    title: "Nothing on the calendar gets skipped",
+    body: "Groups, last sixteen, the final on the far end. All 104 ties run on the same engine. Tap into anything already kicked off and the read picks up from that second.",
     accent: "#00c4ff",
     wide: false,
   },
   {
     num: "03",
-    title: "Built for your phone while the game is on TV",
-    body: "Dense information, fast to scan. No loading spinners. No account gates. The data updates without you touching anything.",
+    title: "Made for the phone in your hand while the TV runs",
+    body: "Tight rows, quick to skim, nothing spinning. No login wall stands in front of you. The numbers refresh on their own while you keep your eyes on the broadcast.",
     accent: "var(--purple)",
     wide: true,
   },
   {
     num: "04",
-    title: "Your team, your angle",
-    body: "Pick the side you support and every piece of analysis comes from that direction. A red card reads differently depending on which end of the pitch it happened on.",
+    title: "Read from the side you back",
+    body: "Choose the team you are pulling for and every note leans that way. A sending-off lands as relief or trouble depending on whose half of the pitch it happened in.",
     accent: "var(--orange)",
     wide: false,
   },
   {
     num: "05",
-    title: "Under two seconds from event to screen",
-    body: "Groq's inference runs fast enough that the commentary reaches you before the broadcast replay finishes. The analysis is there when the moment is still fresh.",
+    title: "Roughly a second and a half, event to text",
+    body: "Groq turns the moment around quick enough that the line shows up before the replay finishes rolling. The read is waiting while the goal is still fresh in the room.",
     accent: "var(--gold)",
     wide: false,
   },
@@ -146,7 +146,7 @@ export default function Features() {
             animate={inView ? { opacity: 1 } : {}}
             style={{ fontSize: "11px", fontWeight: 800, color: "var(--green)", letterSpacing: "0.12em", marginBottom: "14px" }}
           >
-            WHAT IT DOES
+WHAT YOU GET
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export default function Features() {
               maxWidth: "480px",
             }}
           >
-            More than a scoreboard
+A scoreboard that talks back
           </motion.h2>
         </div>
 

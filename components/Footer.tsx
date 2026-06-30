@@ -1,5 +1,7 @@
 "use client";
 
+import { Link001, Link002, Link003 } from "@/components/ui/skiper-ui/skiper40";
+
 export default function Footer() {
   return (
     <footer style={{
@@ -35,20 +37,23 @@ export default function Footer() {
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <a href="https://txline.txodds.com" target="_blank" rel="noopener noreferrer"
-            style={{ fontSize: "12px", color: "var(--text-3)", textDecoration: "none" }}>
-            TxLINE API
-          </a>
-          <a href="https://github.com/nayrbryanGaming/matchmind" target="_blank" rel="noopener noreferrer"
-            style={{ fontSize: "12px", color: "var(--text-3)", textDecoration: "none" }}>
-            GitHub
-          </a>
-          <span style={{ fontSize: "12px", color: "var(--text-3)" }}>
-            Built on Solana
-          </span>
+        <div style={{ display: "flex", gap: "26px", alignItems: "center", fontSize: "12px", color: "var(--text-3)" }}>
+          <Link001 href="https://txline.txodds.com" className="footer-link">
+            TxLINE feed
+          </Link001>
+          <Link002 href="https://github.com/nayrbryanGaming/matchmind" className="footer-link">
+            Source on GitHub
+          </Link002>
+          <Link003 href="https://solana.com" className="footer-link">
+            Runs on Solana
+          </Link003>
         </div>
       </div>
+
+      <style>{`
+        .footer-link { color: var(--text-3); text-decoration: none; transition: color 0.2s ease; }
+        .footer-link:hover { color: var(--text); }
+      `}</style>
     </footer>
   );
 }

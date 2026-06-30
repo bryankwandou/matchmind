@@ -203,7 +203,7 @@ export default function Hero() {
                 color: "var(--text-3)",
               }}>
                 <span className="live-dot" />
-                <span>104 matches · TxLINE live feed · World Cup 2026</span>
+                <span>104 fixtures · TxLINE feed · World Cup 2026</span>
               </div>
             </motion.div>
 
@@ -215,7 +215,7 @@ export default function Hero() {
               letterSpacing: "-0.04em",
               marginBottom: "20px",
             }}>
-              <WordFadeIn text="Your match," delay={0.15} style={{ display: "block", color: "var(--text)" }} />
+              <WordFadeIn text="The match," delay={0.15} style={{ display: "block", color: "var(--text)" }} />
               <span style={{ display: "block" }}>
                 <motion.span
                   initial={{ opacity: 0, y: 20 }}
@@ -228,7 +228,7 @@ export default function Hero() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  explained live.
+                  read out loud.
                 </motion.span>
               </span>
             </h1>
@@ -246,7 +246,7 @@ export default function Hero() {
                 maxWidth: "480px",
               }}
             >
-              MatchMind reads TxLINE data across all 104 World Cup games — goals, red cards, odds movements — and tells you what each one means the moment it happens.
+              MatchMind watches the TxLINE feed for every World Cup game. A goal drops, a player walks, the price swings — and you get a plain sentence explaining what it means while the moment is still on screen.
             </motion.p>
 
             {/* CTAs */}
@@ -275,7 +275,7 @@ export default function Hero() {
                   }}
                 >
                   <span className="live-dot" style={{ background: "#000" }} />
-                  Watch a live match
+                  Open a match
                 </motion.span>
               </MagneticButton>
 

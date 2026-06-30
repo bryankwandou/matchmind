@@ -6,27 +6,27 @@ import { useRef } from "react";
 const STEPS = [
   {
     number: "01",
-    title: "Pick your team and style",
-    body: "Select the team you support and how you want the analysis delivered — calm and data-heavy, or fast and conversational. MatchMind adjusts its language accordingly.",
-    detail: "Supports 12 languages · 3 commentary styles",
+    title: "Set your team and tone",
+    body: "Name the side you follow and say how you want it spoken to you — measured and number-led, or loose and chatty. The wording bends to match that choice.",
+    detail: "12 languages · 3 tones of voice",
   },
   {
     number: "02",
-    title: "Connect to the live feed",
-    body: "TxLINE streams live match data — scores, events, odds from 50+ bookmakers — directly into MatchMind. No refresh needed. The feed updates every 10 seconds.",
-    detail: "104 matches · Live odds · Full event log",
+    title: "Hook into the feed",
+    body: "TxLINE pipes scores, events, and prices from a wide book panel straight in. Nothing to reload — the feed refreshes on a short cycle on its own.",
+    detail: "104 fixtures · live prices · full event log",
   },
   {
     number: "03",
-    title: "Events trigger analysis",
-    body: "Every significant moment — a goal, a red card, a 0.3-point odds movement — triggers Groq AI to produce a brief analysis. You see it within 2 seconds of the event.",
-    detail: "Groq inference · Sub-2s response · No lag",
+    title: "Moments fire off a read",
+    body: "Anything that matters — a finish, a red, a sharp drift in the price — kicks Groq into writing a couple of lines. It reaches you about a second and a half later.",
+    detail: "Groq inference · ~1.5s turnaround · no stutter",
   },
   {
     number: "04",
-    title: "Follow the match your way",
-    body: "Scroll back through the event log at any point, or watch the analysis stream live. Each entry links to the odds snapshot at that moment.",
-    detail: "Full match history · Odds timeline · Shareable clips",
+    title: "Track it however suits you",
+    body: "Roll back through the log whenever you like, or let the reads land in real time. Each one ties to the price as it stood at that exact minute.",
+    detail: "full history · price timeline · clips to share",
   },
 ];
 
@@ -161,7 +161,7 @@ export default function HowItWorks() {
               color: "var(--text)",
             }}
           >
-            Four steps, one match
+Four moves, one match
           </motion.h2>
         </div>
 

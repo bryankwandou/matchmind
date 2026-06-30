@@ -254,7 +254,7 @@ export default function MatchListPage() {
             )}
           </div>
           <p style={{ fontSize: "14px", color: "var(--text-3)" }}>
-            {matches.length} matches · TxLINE feed · odds from 50+ bookmakers
+            {matches.length} ties · TxLINE feed · prices off 50+ books
           </p>
         </motion.div>
 
@@ -308,7 +308,7 @@ export default function MatchListPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-3)", fontSize: "14px" }}>
-            No matches in this category.
+Nothing here under that filter.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

@@ -102,7 +102,7 @@ export default function Navigation() {
             }}
           >
             <span className="live-dot" style={{ width: "6px", height: "6px" }} />
-            Watch live
+            Open a match
           </motion.a>
         </div>
       </motion.nav>

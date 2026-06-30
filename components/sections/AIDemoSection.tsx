@@ -137,7 +137,7 @@ export default function AIDemoSection() {
                 marginBottom: "18px",
               }}
             >
-              Watch it work through a match
+See it run a whole half
             </motion.h2>
 
             <motion.p
@@ -146,7 +146,7 @@ export default function AIDemoSection() {
               transition={{ delay: 0.2 }}
               style={{ fontSize: "14px", color: "var(--text-2)", lineHeight: 1.75, marginBottom: "28px" }}
             >
-              Argentina vs France, Quarter-Final replay. Every TxLINE event triggered an AI response within 2 seconds. This is exactly what the live experience looks like during a match.
+Argentina against France, a quarter-final played back. Each TxLINE moment pulled a written read inside a couple of seconds. What you are looking at is the same thing you would see sitting with a match in real time.
             </motion.p>
 
             {/* Specs */}
@@ -158,9 +158,9 @@ export default function AIDemoSection() {
             >
               {[
                 ["Model", "Groq llama-3.3-70b-versatile"],
-                ["Data feed", "TxLINE live match events"],
-                ["Response time", "Under 2 seconds"],
-                ["Coverage", "104 World Cup matches"],
+                ["Feed", "TxLINE match events, live"],
+                ["Turnaround", "about 1.5 seconds"],
+                ["Reach", "all 104 World Cup ties"],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: "flex", gap: "16px", fontSize: "13px" }}>
                   <span style={{ color: "var(--text-3)", minWidth: "100px", fontWeight: 500 }}>{k}</span>

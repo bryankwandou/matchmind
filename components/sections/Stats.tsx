@@ -6,10 +6,10 @@ import { AnimatedNumber } from "../ui/TextAnimations";
 import { TiltCard } from "../ui/TiltCard";
 
 const STATS = [
-  { value: 104, suffix: "", label: "World Cup matches", sub: "Group stage through the final", accent: "var(--green)" },
-  { value: 2, suffix: "s", label: "Average response time", sub: "From TxLINE event to your screen", accent: "#00c4ff" },
-  { value: 50, suffix: "+", label: "Bookmakers in the feed", sub: "Consensus pricing via TxLINE", accent: "var(--purple)" },
-  { value: 12, suffix: "", label: "Languages", sub: "Pick yours at match start", accent: "var(--orange)" },
+  { value: 104, suffix: "", label: "World Cup ties", sub: "Groups all the way to the final", accent: "var(--green)" },
+  { value: 2, suffix: "s", label: "Typical turnaround", sub: "TxLINE moment to your screen", accent: "#00c4ff" },
+  { value: 50, suffix: "+", label: "Books in the panel", sub: "Blended pricing through TxLINE", accent: "var(--purple)" },
+  { value: 12, suffix: "", label: "Languages", sub: "Chosen as the match kicks off", accent: "var(--orange)" },
 ];
 
 export default function Stats() {
