@@ -3,8 +3,21 @@ import { NextRequest } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline.txodds.com/api";
+// Devnet free tier by default; override with TXLINE_BASE_URL for mainnet.
+const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline-dev.txodds.com/api";
 const TXLINE_KEY = process.env.TXLINE_API_KEY ?? "";
+const TXLINE_HOST = TXLINE_BASE.replace(/\/api\/?$/, "");
+
+// Fetch a guest JWT for the live stream (TxLINE needs Bearer JWT + X-Api-Token).
+async function getGuestJwt(): Promise<string> {
+  try {
+    const r = await fetch(`${TXLINE_HOST}/auth/guest/start`, { method: "POST" });
+    const body = await r.json();
+    return (body.token as string) ?? "";
+  } catch {
+    return "";
+  }
+}
 
 // Mock event generator for demo mode
 const TEAMS = ["Argentina", "France", "Brazil", "Germany", "Spain", "England"];
@@ -44,10 +57,16 @@ export async function GET(req: NextRequest) {
       send({ Ts: Date.now() }, "heartbeat");
 
       if (hasKey) {
-        // Proxy TxLINE real SSE stream
+        // Proxy TxLINE real SSE stream (devnet free tier)
         try {
+          const jwt = await getGuestJwt();
           const upstream = await fetch(`${TXLINE_BASE}/scores/stream`, {
-            headers: { Authorization: `Bearer ${TXLINE_KEY}` },
+            headers: {
+              ...(jwt && { Authorization: `Bearer ${jwt}` }),
+              "X-Api-Token": TXLINE_KEY,
+              Accept: "text/event-stream",
+              "Cache-Control": "no-cache",
+            },
             signal: req.signal,
           });
 

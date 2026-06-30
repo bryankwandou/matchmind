@@ -23,34 +23,47 @@ if (!token) {
   process.exit(1);
 }
 
+// Devnet free tier base — keeps secrets out of code; injected as encrypted env var.
+const BASE_URL = process.env.TXLINE_BASE_URL ?? "https://txline-dev.txodds.com/api";
+
 console.log(`[info] Token: ${token.slice(0, 20)}... (${token.length} chars)`);
-console.log("[info] Setting TXLINE_API_KEY on Vercel (Production + Development)...");
+console.log(`[info] Base URL: ${BASE_URL}`);
+console.log("[info] Setting Vercel env vars (Production + Development)...");
 
-// Write to temp file to avoid shell exposure
-const tmpFile = path.join(os.tmpdir(), `txline_key_${Date.now()}.txt`);
-fs.writeFileSync(tmpFile, token, { encoding: "utf8" });
+// Write secret values to temp files to avoid shell history / arg exposure (COBIT)
+function writeTmp(value) {
+  const f = path.join(os.tmpdir(), `txl_${Math.random().toString(36).slice(2)}.txt`);
+  fs.writeFileSync(f, value, { encoding: "utf8" });
+  return f;
+}
 
-function runVercel(env) {
+function setVar(name, tmpFile, env) {
   try {
-    const cmd = `type "${tmpFile}" | npx vercel env add TXLINE_API_KEY ${env} --force`;
+    const cmd = `type "${tmpFile}" | npx vercel env add ${name} ${env} --force`;
     const out = execSync(cmd, { shell: "cmd.exe", stdio: "pipe" }).toString();
-    console.log(`  [ok] ${env}: ${out.includes("Saved") || out.includes("Overrode") ? "saved" : out.trim().slice(0, 80)}`);
+    console.log(`  [ok] ${name} (${env}): ${out.includes("Saved") || out.includes("Overrode") ? "saved" : out.trim().slice(0, 60)}`);
   } catch (e) {
     const msg = e.stdout?.toString() ?? e.message ?? "";
     if (msg.includes("Overrode") || msg.includes("Saved")) {
-      console.log(`  [ok] ${env}: saved`);
+      console.log(`  [ok] ${name} (${env}): saved`);
     } else {
-      console.log(`  [warn] ${env}: ${msg.slice(0, 120)}`);
+      console.log(`  [warn] ${name} (${env}): ${msg.slice(0, 120)}`);
     }
   }
 }
 
-runVercel("production");
-runVercel("development");
+const keyTmp = writeTmp(token);
+const baseTmp = writeTmp(BASE_URL);
 
-// Clean up temp file immediately
-fs.unlinkSync(tmpFile);
-console.log("[info] Temp file deleted.");
+for (const env of ["production", "development"]) {
+  setVar("TXLINE_API_KEY", keyTmp, env);
+  setVar("TXLINE_BASE_URL", baseTmp, env);
+}
+
+// Clean up temp files immediately
+fs.unlinkSync(keyTmp);
+fs.unlinkSync(baseTmp);
+console.log("[info] Temp files deleted.");
 
 // Trigger redeploy
 console.log("\n[info] Triggering Vercel redeploy...");

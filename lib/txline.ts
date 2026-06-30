@@ -1,7 +1,11 @@
-const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline.txodds.com/api";
+// Devnet free tier (txline-dev) is the default; override with TXLINE_BASE_URL for mainnet.
+const TXLINE_BASE = process.env.TXLINE_BASE_URL ?? "https://txline-dev.txodds.com/api";
 const TXLINE_KEY  = process.env.TXLINE_API_KEY ?? "";
 
 export const HAS_TXLINE_KEY = !!process.env.TXLINE_API_KEY;
+
+// Guest auth lives on the same host as the API base (txline-dev for devnet).
+const TXLINE_HOST = TXLINE_BASE.replace(/\/api\/?$/, "");
 
 // Guest JWT — refreshed lazily, cached until close to expiry
 let _guestJwt: string | null = null;
@@ -11,7 +15,7 @@ const JWT_TTL_MS = 24 * 60 * 60 * 1000; // refresh every 24 hours (JWT lasts 30 
 async function getGuestJwt(): Promise<string> {
   if (_guestJwt && Date.now() - _guestJwtAt < JWT_TTL_MS) return _guestJwt;
   try {
-    const r = await fetch("https://txline.txodds.com/auth/guest/start", { method: "POST" });
+    const r = await fetch(`${TXLINE_HOST}/auth/guest/start`, { method: "POST" });
     const body = await r.json();
     _guestJwt = (body.token as string) ?? "";
     _guestJwtAt = Date.now();

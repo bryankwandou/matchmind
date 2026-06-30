@@ -12,7 +12,7 @@ import {
   TOKEN_2022_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
-  createAssociatedTokenAccountIdempotentInstruction,
+  createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import nacl from "tweetnacl";
 import axios from "axios";
@@ -33,8 +33,9 @@ const DURATION_WEEKS = 4;
 const LEAGUES        = [];   // empty = standard bundle
 
 const WALLET_PATH = "C:\\Users\\arche\\.config\\solana\\veztra-deploy.json";
-const TX_SIG_FILE = path.join(__dirname, ".txline-txsig.txt");
-const TOKEN_FILE  = path.join(__dirname, ".txline-token.txt");
+const TX_SIG_FILE      = path.join(__dirname, ".txline-txsig.txt");
+const TOKEN_FILE       = path.join(__dirname, ".txline-token.txt");
+const ATA_PAYER_FILE   = path.join(__dirname, ".txline-ata-payer.json");
 
 // ── PDAs derived per docs ────────────────────────────────────────────────────
 const [pricingMatrixPda] = PublicKey.findProgramAddressSync(
@@ -100,32 +101,72 @@ async function subscribeOnChain(keypair, connection) {
     data,
   });
 
-  const { blockhash } = await connection.getLatestBlockhash("confirmed");
-  const tx = new Transaction({ recentBlockhash: blockhash, feePayer: keypair.publicKey });
-
+  // ── ATA creation uses a separate CLEAN payer keypair ────────────────────────
+  // The subscriber wallet (35z7X59...) is a durable nonce account with 80 bytes
+  // of data. System Program rejects Transfer FROM accounts with data.
+  // The ATAP calls SystemProgram::Transfer internally, so it can't use the nonce
+  // account as payer. Solution: use a fresh keypair (no data) as the ATA payer.
   if (!ataInfo) {
-    console.log("  [info] User ATA not found — prepending createAssociatedTokenAccountIdempotent...");
-    const ataRent = await connection.getMinimumBalanceForRentExemption(165);
-    const balance = await connection.getBalance(keypair.publicKey);
-    console.log(`  [info] Balance: ${balance / 1e9} SOL, ATA rent: ${ataRent / 1e9} SOL`);
-    if (balance < ataRent + 10000) {
-      throw new Error(
-        `Insufficient SOL: need ${(ataRent + 10000) / 1e9} SOL, have ${balance / 1e9} SOL.\n` +
-        `  Fund: ${keypair.publicKey.toBase58()} with 0.003 SOL on mainnet then retry.`
-      );
+    // Load or generate the clean ATA payer keypair
+    let ataPayer;
+    if (fs.existsSync(ATA_PAYER_FILE)) {
+      ataPayer = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(ATA_PAYER_FILE, "utf8"))));
+      console.log("  [info] Loaded ATA payer:", ataPayer.publicKey.toBase58());
+    } else {
+      ataPayer = Keypair.generate();
+      fs.writeFileSync(ATA_PAYER_FILE, JSON.stringify(Array.from(ataPayer.secretKey)));
+      console.log("  [info] Generated ATA payer:", ataPayer.publicKey.toBase58());
     }
-    tx.add(
-      createAssociatedTokenAccountIdempotentInstruction(
-        keypair.publicKey,
-        userTokenAccount,
-        keypair.publicKey,
+
+    // Poll until ATA payer has enough SOL
+    const ATA_PAYER_NEEDED = 0.003;
+    let ataBal = await connection.getBalance(ataPayer.publicKey);
+    if (ataBal < ATA_PAYER_NEEDED * 1e9) {
+      console.log(`\n  ⚠ ATA payer needs ${ATA_PAYER_NEEDED} SOL on mainnet:`);
+      console.log(`  → ${ataPayer.publicKey.toBase58()}`);
+      console.log(`  Current balance: ${ataBal / 1e9} SOL. Polling every 15s...\n`);
+      while (ataBal < ATA_PAYER_NEEDED * 1e9) {
+        await new Promise(r => setTimeout(r, 15000));
+        ataBal = await connection.getBalance(ataPayer.publicKey);
+        process.stdout.write(`\r  Balance: ${(ataBal/1e9).toFixed(6)} SOL   `);
+      }
+      console.log(`\n  [ok] ATA payer funded: ${(ataBal/1e9).toFixed(6)} SOL`);
+    } else {
+      console.log(`  [ok] ATA payer balance: ${(ataBal/1e9).toFixed(6)} SOL`);
+    }
+
+    // Transaction 1: Create ATA (payer = clean wallet, owner = nonce account)
+    console.log("\n  [tx-1] Creating ATA...");
+    const { blockhash: bh1 } = await connection.getLatestBlockhash("confirmed");
+    const ataTx = new Transaction({ recentBlockhash: bh1, feePayer: ataPayer.publicKey });
+    ataTx.add(
+      createAssociatedTokenAccountInstruction(
+        ataPayer.publicKey,   // payer (clean, no data)
+        userTokenAccount,     // ATA address
+        keypair.publicKey,    // owner (nonce account)
         TOKEN_MINT,
         TOKEN_2022_PROGRAM_ID,
         ASSOCIATED_TOKEN_PROGRAM_ID
       )
     );
+    ataTx.sign(ataPayer);
+    const ataTxSig = await connection.sendRawTransaction(ataTx.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: "confirmed",
+    });
+    console.log("  [ok] ATA tx:", ataTxSig);
+    await connection.confirmTransaction(ataTxSig, "confirmed");
+    console.log("  [ok] ATA created");
+  } else {
+    console.log("  [ok] ATA already exists");
   }
 
+  // Transaction 2: Subscribe (fee payer = nonce account, signer = nonce account)
+  // Nonce accounts CAN pay tx fees — the validator deducts directly at runtime
+  // level without calling SystemProgram::Transfer.
+  console.log("\n  [tx-2] Subscribing...");
+  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ recentBlockhash: blockhash, feePayer: keypair.publicKey });
   tx.add(subscribeIx);
   tx.sign(keypair);
 
@@ -133,7 +174,7 @@ async function subscribeOnChain(keypair, connection) {
     skipPreflight: false,
     preflightCommitment: "confirmed",
   });
-  console.log("  [ok] tx:", txSig);
+  console.log("  [ok] subscribe tx:", txSig);
   await connection.confirmTransaction(txSig, "confirmed");
   console.log("  [ok] confirmed");
   fs.writeFileSync(TX_SIG_FILE, txSig);
