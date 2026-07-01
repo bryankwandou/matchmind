@@ -49,35 +49,40 @@ export async function generateCommentary(req: CommentaryRequest): Promise<string
     : "";
 
   const isQuestion = event.type === "goal" && event.player && event.player === event.detail;
-  const prompt = isQuestion
-    ? `You are a football analyst. A fan watching ${matchContext.homeTeam} ${matchContext.score.home}-${matchContext.score.away} ${matchContext.awayTeam} (${event.minute}', ${matchContext.competition}) asks:
 
-"${event.player}"
+  // The only facts the model is allowed to treat as true.
+  const known = [
+    `Fixture: ${matchContext.homeTeam} vs ${matchContext.awayTeam}`,
+    `Score: ${matchContext.homeTeam} ${matchContext.score.home}, ${matchContext.awayTeam} ${matchContext.score.away}`,
+    `Clock: ${event.minute}'`,
+    `Competition: ${matchContext.competition}`,
+    event.detail && !isQuestion ? `Latest event: ${event.type.replace(/_/g, " ")} — ${event.player || "unknown"} (${event.team})` : "",
+    oddsContext,
+  ].filter(Boolean).join("\n");
 
-Answer in 2-3 sentences. Be direct. No filler words. No emojis. Reference the current match state where relevant.`
-    : `You are a football pundit providing real-time match commentary.
+  // Shared guardrails — the fix for hallucinated players and off-topic replies.
+  const guard = `Ground rules:
+- Use only the facts in KNOWN below. Do not invent player names, minutes, cards, or stats that are not listed. The feed gives team scores, not per-player breakdowns, so if you are asked which player did something and it is not in KNOWN, say the feed does not name individual scorers.
+- If a request asks you to insult, mock, or demean anyone, decline in one short line and offer a factual read instead.
+- Reply in the same language the user wrote in.
+- No emojis. No hype words. Lead with the fact, then what it means.`;
 
-Match: ${matchContext.homeTeam} ${matchContext.score.home}-${matchContext.score.away} ${matchContext.awayTeam}
-Minute: ${event.minute}'
-Competition: ${matchContext.competition}
-Event: ${event.type.replace(/_/g, " ")} — ${event.player || ""} (${event.team})
-${event.detail ? `Detail: ${event.detail}` : ""}
-${oddsContext}
-${teamAngle}
+  const system = isQuestion
+    ? `You answer questions about one live football match for a fan watching it. Be specific and never guess.`
+    : `You write one short, real-time note about a football match event for a fan watching it.`;
 
-Style instruction: ${styleGuide[pundtStyle]}
-
-Rules:
-- No filler phrases like "exciting" or "fascinating"
-- No emojis
-- Write in plain, direct English
-- Start with the fact, then the meaning`;
+  const user = isQuestion
+    ? `KNOWN:\n${known}\n\nThe fan asks:\n"${event.player}"\n\n${guard}\n\nAnswer in 2-3 sentences.`
+    : `KNOWN:\n${known}\n${teamAngle ? "\n" + teamAngle : ""}\n\nStyle: ${styleGuide[pundtStyle]}\n\n${guard}`;
 
   const completion = await getGroq().chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 200,
-    temperature: 0.7,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+    max_tokens: 220,
+    temperature: 0.4,
   });
 
   return completion.choices[0]?.message?.content ?? "No commentary available.";

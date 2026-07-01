@@ -453,7 +453,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "transparent", position: "relative", overflow: "hidden" }}>
       <AuroraBackground />
       <SpotlightGrid />
       <Navigation />
@@ -476,7 +476,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           style={{
-            background: "var(--bg-card)",
+            background: "var(--grad-card)",
             border: "1px solid var(--border-2)",
             borderRadius: "16px",
             padding: "28px 32px",
@@ -561,7 +561,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "16px" }} className="match-layout">
           {/* Left — commentary feed */}
           <div style={{
-            background: "var(--bg-card)",
+            background: "var(--grad-card)",
             border: "1px solid var(--border)",
             borderRadius: "16px",
             overflow: "hidden",
@@ -575,7 +575,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              background: "var(--bg-2)",
+              background: "var(--grad-bar)",
             }}>
               <div style={{ display: "flex", gap: "5px" }}>
                 {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
@@ -695,7 +695,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
 
           {/* Right — events timeline */}
           <div style={{
-            background: "var(--bg-card)",
+            background: "var(--grad-card)",
             border: "1px solid var(--border)",
             borderRadius: "16px",
             overflow: "hidden",
@@ -703,7 +703,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             <div style={{
               padding: "14px 16px",
               borderBottom: "1px solid var(--border)",
-              background: "var(--bg-2)",
+              background: "var(--grad-bar)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -756,7 +756,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             <div style={{
               padding: "14px 16px",
               borderTop: "1px solid var(--border)",
-              background: "var(--bg-2)",
+              background: "var(--grad-bar)",
             }}>
               <p style={{ fontSize: "9px", color: "var(--text-3)", marginBottom: "8px", fontWeight: 700, letterSpacing: "0.08em" }}>
                 CURRENT ODDS

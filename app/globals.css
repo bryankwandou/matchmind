@@ -5,15 +5,20 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --bg: #050505;
-  --bg-2: #0d0d0d;
-  --bg-3: #141414;
-  --bg-card: #111111;
-  --border: oklch(0.922 0 0);
-  --border-2: #2a2a2a;
-  --text: #f0f0f0;
-  --text-2: #888888;
-  --text-3: #555555;
+  /* Deep tinted base — cool navy, never pure black */
+  --bg: #070a12;
+  --bg-2: #0c111c;
+  --bg-3: #121826;
+  --bg-card: #0f1420;
+  --border: #212a3d;
+  --border-2: #2e3a52;
+  --text: #eef1f6;
+  --text-2: #93a0b5;
+  --text-3: #5d6a80;
+  /* Reusable surface + bar gradients so panels lift off the background */
+  --grad-card: linear-gradient(158deg, #141b2c 0%, #0e1320 100%);
+  --grad-bar: linear-gradient(180deg, #171f31 0%, #10151f 100%);
+  --grad-accent: linear-gradient(135deg, var(--green) 0%, #00c4ff 50%, var(--purple) 100%);
   --green: #00e87a;
   --green-dim: #00e87a22;
   --green-glow: #00e87a44;
@@ -72,6 +77,33 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Colour wash that sits under every page — same green/cyan/purple family as
+   the landing aurora, so no screen ever reads as flat black. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 12% 0%, rgba(0, 232, 122, 0.10), transparent 60%),
+    radial-gradient(55% 45% at 88% 8%, rgba(0, 196, 255, 0.09), transparent 60%),
+    radial-gradient(70% 55% at 50% 110%, rgba(124, 58, 237, 0.12), transparent 65%),
+    linear-gradient(180deg, #080c16 0%, #070a12 55%, #090710 100%);
+}
+
+/* Surface + bar helpers: gradient fills with a lifted border so cards, tabs
+   and menus read as distinct layers above the wash. */
+.surface-grad {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+}
+.bar-grad {
+  background: var(--grad-bar);
+  border: 1px solid var(--border);
 }
 
 ::-webkit-scrollbar { width: 4px; }

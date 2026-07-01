@@ -33,9 +33,9 @@ export default function Navigation() {
           alignItems: "center",
           justifyContent: "space-between",
           transition: "background 0.3s ease, border-color 0.3s ease",
-          background: scrolled ? "rgba(5,5,5,0.92)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px)" : "none",
-          borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+          background: scrolled ? "rgba(12,17,28,0.82)" : "transparent",
+          backdropFilter: scrolled ? "blur(20px) saturate(140%)" : "none",
+          borderBottom: scrolled ? "1px solid var(--border-2)" : "1px solid transparent",
         }}
       >
         {/* Logo */}
