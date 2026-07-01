@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { AuroraBackground, SpotlightGrid } from "@/components/ui/AuroraBackground";
 
 type Match = {
   id: string;
@@ -14,11 +15,11 @@ type Match = {
   minute: number;
   status: "live" | "pre" | "finished";
   stage: string;
-  homeOdds: number;
-  awayOdds: number;
-  drawOdds: number;
+  homeOdds: number | null;
+  awayOdds: number | null;
+  drawOdds: number | null;
   lastEvent?: string;
-  source: string;
+  source?: string;
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -120,7 +121,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
                 }}>
                   <p style={{ fontSize: "8px", color: "var(--text-3)", marginBottom: "1px" }}>{label}</p>
                   <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-2)", fontVariantNumeric: "tabular-nums" }}>
-                    {val.toFixed(2)}
+                    {typeof val === "number" && val > 0 ? val.toFixed(2) : "—"}
                   </p>
                 </div>
               ))}
@@ -216,10 +217,12 @@ export default function MatchListPage() {
   const liveCount = matches.filter((m) => m.status === "live").length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
+      <AuroraBackground />
+      <SpotlightGrid />
       <Navigation />
 
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "100px 24px 80px" }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "100px 24px 80px", position: "relative", zIndex: 1 }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

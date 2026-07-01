@@ -4,6 +4,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, use } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { AuroraBackground, SpotlightGrid } from "@/components/ui/AuroraBackground";
 
 type MatchEvent = {
   id: string;
@@ -92,6 +93,14 @@ const AI_STYLE_OPTIONS = [
 function OddsBar({ home, draw, away, homeTeam, awayTeam }: {
   home: number; draw: number; away: number; homeTeam: string; awayTeam: string;
 }) {
+  const priced = home > 0 && draw > 0 && away > 0;
+  if (!priced) {
+    return (
+      <div style={{ marginTop: "16px", textAlign: "center", fontSize: "11px", color: "var(--text-3)", padding: "8px 0" }}>
+        No price posted for this tie yet
+      </div>
+    );
+  }
   const total = (1 / home) + (1 / draw) + (1 / away);
   const homePct = Math.round((1 / home / total) * 100);
   const drawPct = Math.round((1 / draw / total) * 100);
@@ -353,6 +362,41 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  // Pull the real fixture from TxLINE on mount; fall back to the sample if the
+  // id is not on the feed (e.g. the bundled m001 demo link).
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/matches/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.match) return;
+        const m = data.match;
+        setMatch({
+          id: m.id,
+          homeTeam: m.homeTeam,
+          awayTeam: m.awayTeam,
+          homeScore: m.homeScore,
+          awayScore: m.awayScore,
+          minute: m.minute,
+          status: m.status,
+          stage: m.stage,
+          homeOdds: m.homeOdds ?? 0,
+          awayOdds: m.awayOdds ?? 0,
+          drawOdds: m.drawOdds ?? 0,
+          events: (m.events ?? []).map((e: MatchEvent) => ({
+            id: e.id,
+            type: e.type,
+            team: e.team,
+            player: e.player,
+            minute: e.minute,
+            detail: e.detail,
+          })),
+        });
+      })
+      .catch(() => { /* keep the sample match */ });
+    return () => { cancelled = true; };
+  }, [id]);
+
   // SSE real-time stream connection
   useEffect(() => {
     const es = new EventSource("/api/scores/stream");
@@ -409,10 +453,12 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
+      <AuroraBackground />
+      <SpotlightGrid />
       <Navigation />
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "90px 24px 60px" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "90px 24px 60px", position: "relative", zIndex: 1 }}>
         {/* Breadcrumb */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -729,8 +775,8 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                     borderRadius: "7px",
                   }}>
                     <p style={{ fontSize: "9px", color: "var(--text-3)", marginBottom: "2px" }}>{l}</p>
-                    <p style={{ fontSize: "14px", fontWeight: 900, color: c, fontVariantNumeric: "tabular-nums" }}>
-                      {v.toFixed(2)}
+                    <p style={{ fontSize: "14px", fontWeight: 900, color: v > 0 ? c : "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>
+                      {v > 0 ? v.toFixed(2) : "—"}
                     </p>
                   </div>
                 ))}
