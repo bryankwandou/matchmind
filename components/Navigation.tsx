@@ -65,7 +65,7 @@ export default function Navigation() {
           {["How it works", "Live matches", "Features"].map((label) => (
             <a
               key={label}
-              href={`#${label.toLowerCase().replace(/\s+/g, "-")}`}
+              href={label === "Live matches" ? "/match" : `#${label.toLowerCase().replace(/\s+/g, "-")}`}
               style={{
                 fontSize: "14px",
                 color: "var(--text-2)",

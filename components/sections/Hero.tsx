@@ -256,7 +256,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.65 }}
               style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "48px" }}
             >
-              <MagneticButton href="#live-matches">
+              <MagneticButton href="/match">
                 <motion.span
                   whileHover={{ boxShadow: "0 0 60px var(--green-glow)" }}
                   style={{
