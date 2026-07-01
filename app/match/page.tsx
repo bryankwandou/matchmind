@@ -55,10 +55,13 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           }}
           transition={{ duration: 0.2 }}
           style={{
-            background: "var(--bg-card)",
-            border: `1px solid ${isLive ? "var(--green)33" : "var(--border)"}`,
+            background: isLive
+              ? "linear-gradient(158deg, rgba(0,232,122,0.10), rgba(14,19,32,0.96))"
+              : "var(--grad-card)",
+            border: `1px solid ${isLive ? "var(--green)44" : "var(--border-2)"}`,
             borderRadius: "14px",
             padding: "20px 22px",
+            backdropFilter: "blur(6px)",
             cursor: "pointer",
             position: "relative",
             overflow: "hidden",
@@ -217,7 +220,7 @@ export default function MatchListPage() {
   const liveCount = matches.filter((m) => m.status === "live").length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "transparent", position: "relative", overflow: "hidden" }}>
       <AuroraBackground />
       <SpotlightGrid />
       <Navigation />
@@ -276,9 +279,11 @@ export default function MatchListPage() {
                 padding: "7px 16px",
                 borderRadius: "7px",
                 border: "1px solid",
-                borderColor: filter === tab ? "var(--green)44" : "var(--border)",
-                background: filter === tab ? "rgba(0,232,122,0.07)" : "transparent",
-                color: filter === tab ? "var(--green)" : "var(--text-3)",
+                borderColor: filter === tab ? "var(--green)66" : "var(--border-2)",
+                background: filter === tab
+                  ? "linear-gradient(180deg, rgba(0,232,122,0.16), rgba(0,232,122,0.06))"
+                  : "var(--grad-bar)",
+                color: filter === tab ? "var(--green)" : "var(--text-2)",
                 fontSize: "12px",
                 fontWeight: 600,
                 cursor: "pointer",

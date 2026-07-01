@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main style={{ background: "var(--bg)", minHeight: "100vh" }}>
+    <main style={{ background: "transparent", minHeight: "100vh", position: "relative", zIndex: 1 }}>
       <Navigation />
       <Hero />
       <LiveTicker />
