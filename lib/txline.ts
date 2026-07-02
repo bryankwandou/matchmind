@@ -129,7 +129,7 @@ function readScore(updates: TxScoreRaw[], p1IsHome: boolean) {
   };
 }
 
-function fixtureToMatch(f: TxFixtureRaw, score?: ReturnType<typeof readScore>): TxMatch {
+function fixtureToMatch(f: TxFixtureRaw, score?: ReturnType<typeof readScore>, oddsRecords?: TxOddsRaw[]): TxMatch {
   const home = f.Participant1IsHome ? f.Participant1 : f.Participant2;
   const away = f.Participant1IsHome ? f.Participant2 : f.Participant1;
   return {
@@ -141,8 +141,7 @@ function fixtureToMatch(f: TxFixtureRaw, score?: ReturnType<typeof readScore>): 
     status: deriveStatus(f.StartTime, score?.clock),
     stage: f.Competition,
     startTime: new Date(f.StartTime).toISOString(),
-    // Devnet free tier does not price every tie; expose 0 and let the UI show a dash.
-    odds: { home: 0, draw: 0, away: 0 },
+    odds: oddsRecords ? parseOdds(oddsRecords, f.Participant1IsHome) : { home: 0, draw: 0, away: 0 },
   };
 }
 
@@ -156,19 +155,50 @@ export async function getScoresFor(fixtureId: string | number): Promise<TxScoreR
   return txFetch<TxScoreRaw[]>(`/scores/snapshot/${fixtureId}`, 10);
 }
 
-// /api/odds/snapshot/{id} — price history for one fixture (often empty on devnet).
-export async function getOddsFor(fixtureId: string | number): Promise<unknown[]> {
-  return txFetch<unknown[]>(`/odds/snapshot/${fixtureId}`, 5);
+type TxOddsRaw = {
+  FixtureId: number;
+  Ts: number;
+  SuperOddsType: string;
+  MarketPeriod: string | null;
+  PriceNames: string[];   // ["part1","draw","part2"]
+  Prices: number[];       // milliunits — divide by 1000 for decimal odds
+};
+
+// /api/odds/snapshot/{id} — price history for one fixture.
+export async function getOddsFor(fixtureId: string | number): Promise<TxOddsRaw[]> {
+  return txFetch<TxOddsRaw[]>(`/odds/snapshot/${fixtureId}`, 5);
 }
 
-// Full list: real fixtures, enriched with live score where the feed has one.
+function parseOdds(records: TxOddsRaw[], p1IsHome: boolean): TxMatch["odds"] {
+  const filtered = records.filter(r => r.SuperOddsType === "1X2_PARTICIPANT_RESULT");
+  // Prefer full-match (MarketPeriod null), fall back to any period
+  const candidates = (filtered.filter(r => r.MarketPeriod === null).length > 0
+    ? filtered.filter(r => r.MarketPeriod === null)
+    : filtered
+  ).sort((a, b) => b.Ts - a.Ts);
+  if (candidates.length === 0) return { home: 0, draw: 0, away: 0 };
+  const r = candidates[0];
+  const p1 = (r.Prices[0] ?? 0) / 1000;
+  const dr = (r.Prices[1] ?? 0) / 1000;
+  const p2 = (r.Prices[2] ?? 0) / 1000;
+  return {
+    home: p1IsHome ? p1 : p2,
+    draw: dr,
+    away: p1IsHome ? p2 : p1,
+  };
+}
+
+// Full list: real fixtures, enriched with live score + real odds where the feed has them.
 export async function getLiveMatches(): Promise<TxMatch[]> {
   const fixtures = await getFixturesSnapshot();
   const enriched = await Promise.all(
     fixtures.map(async (f) => {
       try {
-        const updates = await getScoresFor(f.FixtureId);
-        return fixtureToMatch(f, readScore(updates, f.Participant1IsHome));
+        const [updates, oddsRecords] = await Promise.all([
+          getScoresFor(f.FixtureId).catch(() => [] as TxScoreRaw[]),
+          getOddsFor(f.FixtureId).catch(() => [] as TxOddsRaw[]),
+        ]);
+        return fixtureToMatch(f, readScore(updates, f.Participant1IsHome), oddsRecords);
       } catch {
         return fixtureToMatch(f);
       }
@@ -190,13 +220,18 @@ export async function getMatchById(fixtureId: string): Promise<{ match: TxMatch;
   if (!f) return null;
 
   let updates: TxScoreRaw[] = [];
+  let oddsRecords: TxOddsRaw[] = [];
   try {
-    updates = await getScoresFor(f.FixtureId);
+    [updates, oddsRecords] = await Promise.all([
+      getScoresFor(f.FixtureId).catch(() => []),
+      getOddsFor(f.FixtureId).catch(() => []),
+    ]);
   } catch {
     updates = [];
+    oddsRecords = [];
   }
   const score = readScore(updates, f.Participant1IsHome);
-  const match = fixtureToMatch(f, score);
+  const match = fixtureToMatch(f, score, oddsRecords);
 
   // Turn the goal counts into a readable event list (kickoff + each goal).
   const events: TxEvent[] = [
