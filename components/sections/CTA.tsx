@@ -157,7 +157,7 @@ No account. No card. Tap a tie that is already underway and follow it from the v
 
           {/* Tech stack */}
           <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
-            {["TxLINE", "Groq AI", "Next.js 16", "Solana", "Vercel"].map((tech, i) => (
+            {["TxLINE", "AI Commentary", "Next.js 16", "Solana", "Vercel"].map((tech, i) => (
               <motion.span
                 key={tech}
                 initial={{ opacity: 0, y: 10 }}

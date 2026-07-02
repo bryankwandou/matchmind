@@ -37,7 +37,7 @@ const FEATURES = [
   {
     num: "05",
     title: "Roughly a second and a half, event to text",
-    body: "Groq turns the moment around quick enough that the line shows up before the replay finishes rolling. The read is waiting while the goal is still fresh in the room.",
+    body: "The AI turns the moment around fast enough that the line shows up before the replay finishes rolling. The read is waiting while the goal is still fresh in the room.",
     accent: "var(--gold)",
     wide: false,
   },

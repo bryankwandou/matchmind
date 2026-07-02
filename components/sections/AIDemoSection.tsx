@@ -157,7 +157,7 @@ Argentina against France, a quarter-final played back. Each TxLINE moment pulled
               style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}
             >
               {[
-                ["Model", "Groq llama-3.3-70b-versatile"],
+                ["Engine", "Large language model, live inference"],
                 ["Feed", "TxLINE match events, live"],
                 ["Turnaround", "about 1.5 seconds"],
                 ["Reach", "all 104 World Cup ties"],

@@ -15,7 +15,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "MatchMind — Live World Cup Analysis",
   description:
-    "Every goal, every odds shift, every red card — explained in plain language as it happens. Powered by TxLINE live data and Groq AI.",
+    "Every goal, every odds shift, every red card — explained in plain language as it happens. Live data from TxLINE, AI commentary in under two seconds.",
   keywords: ["World Cup 2026", "football", "live odds", "AI analysis", "TxLINE"],
   openGraph: {
     title: "MatchMind — Live World Cup Analysis",

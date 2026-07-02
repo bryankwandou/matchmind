@@ -19,8 +19,8 @@ const STEPS = [
   {
     number: "03",
     title: "Moments fire off a read",
-    body: "Anything that matters — a finish, a red, a sharp drift in the price — kicks Groq into writing a couple of lines. It reaches you about a second and a half later.",
-    detail: "Groq inference · ~1.5s turnaround · no stutter",
+    body: "Anything that matters — a finish, a red, a sharp drift in the price — triggers a short note in plain language. It reaches you about a second and a half after the event registers.",
+    detail: "~1.5s event to text · no stutter · no reload",
   },
   {
     number: "04",
