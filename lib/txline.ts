@@ -129,19 +129,62 @@ function readScore(updates: TxScoreRaw[], p1IsHome: boolean) {
   };
 }
 
+// Poisson implied live-odds — used when TxLINE has no price for a fixture.
+// Models remaining goals as Poisson(λ) per team based on time left.
+function impliedLiveOdds(homeScore: number, awayScore: number, minute: number, status: TxMatch["status"]): TxMatch["odds"] {
+  if (status === "pre") {
+    // No score yet — return neutral WC average pre-match line
+    return { home: 2.45, draw: 3.30, away: 2.90 };
+  }
+  const rem = Math.max(0, 90 - Math.min(minute, 90));
+  const λ = 1.25 * (rem / 90); // avg ~1.25 goals per team per 90 min
+
+  function poisson(rate: number, k: number): number {
+    if (rate <= 0) return k === 0 ? 1 : 0;
+    let p = Math.exp(-rate);
+    for (let i = 0; i < k; i++) p = (p * rate) / (i + 1);
+    return p;
+  }
+
+  let pH = 0, pD = 0, pA = 0;
+  for (let i = 0; i <= 7; i++) {
+    for (let j = 0; j <= 7; j++) {
+      const prob = poisson(λ, i) * poisson(λ, j);
+      const fh = homeScore + i, fa = awayScore + j;
+      if (fh > fa) pH += prob;
+      else if (fh === fa) pD += prob;
+      else pA += prob;
+    }
+  }
+
+  const margin = 1.06; // ~6% bookmaker margin
+  const toOdds = (p: number) => p > 0.005 ? Math.round((margin / p) * 100) / 100 : 99.00;
+  return { home: toOdds(pH), draw: toOdds(pD), away: toOdds(pA) };
+}
+
 function fixtureToMatch(f: TxFixtureRaw, score?: ReturnType<typeof readScore>, oddsRecords?: TxOddsRaw[]): TxMatch {
   const home = f.Participant1IsHome ? f.Participant1 : f.Participant2;
   const away = f.Participant1IsHome ? f.Participant2 : f.Participant1;
+  const status = deriveStatus(f.StartTime, score?.clock);
+  const homeScore = score?.home ?? 0;
+  const awayScore = score?.away ?? 0;
+  const minute = score?.minute ?? 0;
+
+  // Prefer real TxLINE prices; fall back to Poisson model for in-play with no feed price.
+  const realOdds = oddsRecords ? parseOdds(oddsRecords, f.Participant1IsHome) : null;
+  const hasRealOdds = realOdds && (realOdds.home > 0 || realOdds.away > 0);
+  const odds = hasRealOdds ? realOdds! : impliedLiveOdds(homeScore, awayScore, minute, status);
+
   return {
     id: String(f.FixtureId),
     homeTeam: { name: home, code: teamCode(home) },
     awayTeam: { name: away, code: teamCode(away) },
-    score: { home: score?.home ?? 0, away: score?.away ?? 0 },
-    minute: score?.minute ?? 0,
-    status: deriveStatus(f.StartTime, score?.clock),
+    score: { home: homeScore, away: awayScore },
+    minute,
+    status,
     stage: f.Competition,
     startTime: new Date(f.StartTime).toISOString(),
-    odds: oddsRecords ? parseOdds(oddsRecords, f.Participant1IsHome) : { home: 0, draw: 0, away: 0 },
+    odds,
   };
 }
 
