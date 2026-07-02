@@ -248,12 +248,13 @@ function CommentaryBubble({ msg }: { msg: CommentaryMessage }) {
 
 export default function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [match, setMatch] = useState<MatchData>(MOCK_MATCH);
+  const [match, setMatch] = useState<MatchData | null>(null);
   const [commentary, setCommentary] = useState<CommentaryMessage[]>([]);
   const [aiStyle, setAiStyle] = useState<"analyst" | "casual" | "stats">("analyst");
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const [liveConnected, setLiveConnected] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   function scrollChat() {
@@ -263,6 +264,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   }
 
   async function triggerCommentary(event: MatchEvent) {
+    if (!match) return;
     const eventMsg: CommentaryMessage = {
       role: "event",
       content: `${EVENT_ICON[event.type]} — ${event.player !== "—" ? event.player + " · " : ""}${event.minute}'`,
@@ -314,7 +316,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   }
 
   async function sendQuestion() {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !match) return;
     const q = inputText.trim();
     setInputText("");
     const qMsg: CommentaryMessage = {
@@ -362,16 +364,15 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
     }
   }
 
-  // Pull the real fixture from TxLINE on mount; fall back to the sample if the
-  // id is not on the feed (e.g. the bundled m001 demo link).
+  // Pull the real fixture from TxLINE on mount; fall back to MOCK_MATCH if API unavailable.
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/matches/${id}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (cancelled || !data?.match) return;
-        const m = data.match;
-        setMatch({
+        if (cancelled) return;
+        const m = data?.match;
+        const resolved: MatchData = m ? {
           id: m.id,
           homeTeam: m.homeTeam,
           awayTeam: m.awayTeam,
@@ -391,9 +392,13 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             minute: e.minute,
             detail: e.detail,
           })),
-        });
+        } : MOCK_MATCH;
+        setMatch(resolved);
+        setDataLoaded(true);
       })
-      .catch(() => { /* keep the sample match */ });
+      .catch(() => {
+        if (!cancelled) { setMatch(MOCK_MATCH); setDataLoaded(true); }
+      });
     return () => { cancelled = true; };
   }, [id]);
 
@@ -414,27 +419,30 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
 
         // Update score if present
         if (data.score) {
-          setMatch((prev) => ({
+          setMatch((prev) => prev ? ({
             ...prev,
             homeScore: data.score.home ?? prev.homeScore,
             awayScore: data.score.away ?? prev.awayScore,
             minute: data.minute ?? prev.minute,
             status: data.status ?? prev.status,
-          }));
+          }) : prev);
         }
 
         // Trigger commentary for new goal/key events
         if (data.event?.type === "goal" || data.event?.type === "red_card") {
-          const syntheticEvent: MatchEvent = {
-            id: data.id ?? String(Date.now()),
-            type: data.event.type as MatchEvent["type"],
-            team: data.event.team === match.homeTeam ? "home" : "away",
-            player: data.event.player ?? "Player",
-            minute: data.minute ?? match.minute,
-            detail: data.event.detail,
-          };
-          setMatch((prev) => ({ ...prev, events: [...prev.events, syntheticEvent] }));
-          triggerCommentary(syntheticEvent);
+          setMatch((prev) => {
+            if (!prev) return prev;
+            const syntheticEvent: MatchEvent = {
+              id: data.id ?? String(Date.now()),
+              type: data.event.type as MatchEvent["type"],
+              team: data.event.team === prev.homeTeam ? "home" : "away",
+              player: data.event.player ?? "Player",
+              minute: data.minute ?? prev.minute,
+              detail: data.event.detail,
+            };
+            triggerCommentary(syntheticEvent);
+            return { ...prev, events: [...prev.events, syntheticEvent] };
+          });
         }
       } catch {
         // ignore parse errors
@@ -446,11 +454,33 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
     return () => es.close();
   }, [id]);
 
-  // Auto-load commentary for last event on mount
+  // Auto-load commentary for last event — only after REAL data has loaded.
   useEffect(() => {
+    if (!dataLoaded || !match) return;
     const lastGoal = [...match.events].reverse().find((e) => e.type === "goal" || e.type === "penalty");
     if (lastGoal) triggerCommentary(lastGoal);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataLoaded]);
+
+  // Show skeleton while real data loads — never show mock match for a real fixture ID
+  if (!match) {
+    return (
+      <div style={{ minHeight: "100vh", background: "transparent", position: "relative", overflow: "hidden" }}>
+        <AuroraBackground />
+        <Navigation />
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "90px 24px 60px", position: "relative", zIndex: 1 }}>
+          {[180, 500, 320].map((h, i) => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.35, 0.6, 0.35] }}
+              transition={{ duration: 1.3, repeat: Infinity, delay: i * 0.2 }}
+              style={{ height: h, borderRadius: "16px", background: "var(--bg-card)", border: "1px solid var(--border)", marginBottom: "16px" }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "transparent", position: "relative", overflow: "hidden" }}>
@@ -733,23 +763,33 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                 </span>
               </div>
 
-              {[...match.events].reverse().map((event) => (
-                <motion.div
-                  key={event.id}
-                  whileHover={["goal", "penalty", "red_card", "yellow_card"].includes(event.type) ? { backgroundColor: "rgba(255,255,255,0.02)" } : {}}
-                  onClick={() => {
-                    if (["goal", "penalty", "red_card", "yellow_card"].includes(event.type)) {
-                      triggerCommentary(event);
-                    }
-                  }}
-                  style={{
-                    cursor: ["goal", "penalty", "red_card", "yellow_card"].includes(event.type) ? "pointer" : "default",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <EventRow event={event} homeTeam={match.homeTeam} />
-                </motion.div>
-              ))}
+              {[...match.events].reverse().map((event) => {
+                const isClickable = ["goal", "penalty", "red_card", "yellow_card"].includes(event.type);
+                return isClickable ? (
+                  <motion.button
+                    key={event.id}
+                    whileHover={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                    onClick={() => triggerCommentary(event)}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      background: "transparent",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      borderRadius: "6px",
+                      textAlign: "left",
+                    }}
+                    aria-label={`Analyse ${event.type} at ${event.minute}'`}
+                  >
+                    <EventRow event={event} homeTeam={match.homeTeam} />
+                  </motion.button>
+                ) : (
+                  <div key={event.id}>
+                    <EventRow event={event} homeTeam={match.homeTeam} />
+                  </div>
+                );
+              })}
             </div>
 
             {/* Odds numbers */}

@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
             // Forward raw SSE chunks directly
-            controller.enqueue(value ?? encoder.encode(dec.decode(value)));
+            if (value) controller.enqueue(value);
           }
         } catch (err) {
           if ((err as Error).name !== "AbortError") {
