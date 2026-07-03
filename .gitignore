@@ -47,3 +47,5 @@ scripts/.txline-txsig.txt
 scripts/.txline-status.json
 .txline-*.txt
 scripts/.txline-ata-payer.json
+
+.env*
