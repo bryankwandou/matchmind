@@ -2,6 +2,7 @@ import Navigation from "@/components/Navigation";
 import Hero from "@/components/sections/Hero";
 import LiveTicker from "@/components/sections/LiveTicker";
 import Features from "@/components/sections/Features";
+import OnChain from "@/components/sections/OnChain";
 import HowItWorks from "@/components/sections/HowItWorks";
 import AIDemoSection from "@/components/sections/AIDemoSection";
 import Stats from "@/components/sections/Stats";
@@ -17,6 +18,7 @@ export default function Home() {
       <LiveTicker />
       <Stats />
       <Features />
+      <OnChain />
       <HowItWorks />
       <AIDemoSection />
       <Monetization />
