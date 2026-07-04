@@ -109,4 +109,49 @@ Be direct. No filler words. No emojis. Focus on what the odds tell us about how 
   return completion.choices[0]?.message?.content ?? "";
 }
 
+export type RoastRequest = {
+  homeTeam: string;
+  awayTeam: string;
+  pickLabel: string; // e.g. "Colombia" or "Draw" — the team/side name the caller backed
+  result: "win" | "loss";
+  priceTaken: number;
+  finalScore: { home: number; away: number };
+  streak: number;
+};
+
+// Roasts the CALL, never a real player or team — self-directed gambling banter,
+// the same "bad beat" tradition as poker/betting group chats.
+export async function generateRoast(req: RoastRequest): Promise<string> {
+  const { homeTeam, awayTeam, pickLabel, result, priceTaken, finalScore, streak } = req;
+
+  const known = [
+    `Fixture: ${homeTeam} vs ${awayTeam}`,
+    `Final score: ${homeTeam} ${finalScore.home} - ${finalScore.away} ${awayTeam}`,
+    `The call: ${pickLabel} at ${priceTaken.toFixed(2)}`,
+    `Outcome: ${result === "win" ? "correct" : "wrong"}`,
+    `Current streak: ${streak}`,
+  ].join("\n");
+
+  const guard = `Ground rules:
+- Roast the CALL and the caller's judgement only — never a real player, coach, or team's ability. No player or team put-downs.
+- No emojis. No hashtags. One or two sentences, sharp and quotable.
+- If you cannot roast without naming or mocking a real person, write a dry one-liner about the odds instead.
+- Reply in English.`;
+
+  const tone = result === "win"
+    ? "Write a backhanded compliment — congratulate the call while needling how obvious or lucky it looked in hindsight."
+    : "Write a short, funny roast of the call itself — the reasoning that led to it, the confidence, the price taken. Self-deprecating bettor humor, not cruelty.";
+
+  const user = `KNOWN:\n${known}\n\n${tone}\n\n${guard}`;
+
+  const completion = await getGroq().chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: user }],
+    max_tokens: 90,
+    temperature: 0.85,
+  });
+
+  return completion.choices[0]?.message?.content ?? "";
+}
+
 export { getGroq as groq };
