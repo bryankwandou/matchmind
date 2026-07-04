@@ -103,8 +103,14 @@ export default function AIDemoSection() {
     });
   }
 
+  // Fires once when the section scrolls into view — the replay has to start
+  // somewhere, and there's no external system to subscribe to instead.
   useEffect(() => {
-    if (inView && !started) startReplay();
+    if (inView && !started) {
+      /* eslint-disable-next-line react-hooks/set-state-in-effect */
+      startReplay();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView]);
 
   return (

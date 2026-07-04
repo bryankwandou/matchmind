@@ -1,5 +1,11 @@
 /**
- * MatchMind Demo Video Generator — v5 (4K, 3-minute, zero blank frames)
+ * MatchMind Demo Video Generator — v7 (4K capture / 8K output, ~4-minute, zero blank frames)
+ *
+ * v7 adds coverage for the on-chain layer shipped after v5: the landing
+ * page's dedicated on-chain section, Prediction Streak (locking a pick on
+ * an upcoming fixture), Moment Mint, and the real devnet Fan Pass payment
+ * button. Everything from v5/v6 (dynamic fixtures, zero blank frames,
+ * synced SRT + voiceover) is unchanged.
  *
  * Key guarantees:
  *  - Fixture IDs fetched LIVE from /api/matches at runtime → always real data
@@ -24,8 +30,8 @@ const OUT_DIR  = "E:\\Download";
 const TMP_DIR  = path.join(OUT_DIR, "_mm_tmp");
 const RAW_WEBM = path.join(OUT_DIR, "_mm_raw.webm");
 const SRT_FILE = path.join(OUT_DIR, "matchmind-subtitles.srt");
-const OUT_V1   = path.join(OUT_DIR, "matchmind-demo-v1-8k-music-only.mp4");
-const OUT_V2   = path.join(OUT_DIR, "matchmind-demo-v2-8k-subtitled.mp4");
+const OUT_V1   = path.join(OUT_DIR, "matchmind-demo-v7-8k-music-only.mp4");
+const OUT_V2   = path.join(OUT_DIR, "matchmind-demo-v7-8k-subtitled.mp4");
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -37,7 +43,7 @@ async function pickFixtures() {
   const live = matches.filter(m => m.status === "live");
   const pre  = matches.filter(m => m.status === "pre");
   const a = live[0] ?? matches[0];
-  const b = (live[1] ?? pre[0] ?? matches.find(m => m.id !== a.id));
+  const b = (pre[0] ?? live[1] ?? matches.find(m => m.id !== a.id));
   return { a, b };
 }
 
@@ -52,19 +58,23 @@ function buildCues(a, b) {
     { t: 16,  d: 8,  text: "MatchMind puts live scores, consensus odds from 50+ bookmakers,\nand AI-written match notes all in one place." },
     { t: 25,  d: 9,  text: "The landing page loads instantly. Every part of the product\nworks without a login or an account." },
     { t: 36,  d: 9,  text: "Four steps: pick your team and tone, hook into the feed,\nlet moments trigger a read, track it your way." },
-    { t: 48,  d: 9,  text: "The match list pulls directly from the TxLINE feed —\nlive scores update in real time, no page reload needed." },
-    { t: 58,  d: 8,  text: "Cards pulse for matches currently in play. Each one shows\nthe current minute and odds from the market." },
-    { t: 67,  d: 8,  text: "Filter tabs switch between all matches,\nlive only, upcoming, or finished fixtures." },
-    { t: 78,  d: 9,  text: `Opening ${aName} — ${aScore}, live right now.\nReal TxLINE data, streaming as we record.` },
-    { t: 89,  d: 8,  text: "The left panel is the AI commentary feed. The right panel\nshows the scoreboard and every event since kickoff." },
-    { t: 99,  d: 9,  text: "Click any event in the timeline and a written note\nappears in about a second and a half." },
-    { t: 110, d: 9,  text: "The AI reads only the facts the live feed provides.\nIt will not invent a player name or a made-up statistic." },
-    { t: 121, d: 11, text: "You can also ask it a question directly. It answers\nin plain language, grounded in what is on the pitch." },
-    { t: 135, d: 9,  text: `Here is a second fixture: ${bName}.\nOdds and event log come straight from the same feed.` },
-    { t: 146, d: 9,  text: "Where the book has no live price yet, MatchMind derives one\nfrom score and time remaining with a Poisson model." },
-    { t: 158, d: 9,  text: "Connect a Solana wallet to link the on-chain layer.\nThe wallet panel explains exactly what linking does." },
-    { t: 169, d: 8,  text: "MatchMind — live data, grounded AI, built on Solana.\nReady for all 104 World Cup games." },
-    { t: 178, d: 7,  text: "matchmind-omega.vercel.app\ngithub.com/nayrbryanGaming/matchmind" },
+    { t: 48,  d: 10, text: "Scroll further and the on-chain layer is the headline,\nnot a footnote — streaks, minted moments, a real Solana payment." },
+    { t: 60,  d: 9,  text: "The match list pulls directly from the TxLINE feed —\nlive scores update in real time, no page reload needed." },
+    { t: 71,  d: 8,  text: "Cards pulse for matches currently in play. Each one shows\nthe current minute and odds from the market." },
+    { t: 81,  d: 8,  text: "Filter tabs switch between all matches,\nlive only, upcoming, or finished fixtures." },
+    { t: 92,  d: 9,  text: `Opening ${aName} — ${aScore}, live right now.\nReal TxLINE data, streaming as we record.` },
+    { t: 103, d: 8,  text: "The left panel is the AI commentary feed. The right panel\nshows the scoreboard and every event since kickoff." },
+    { t: 113, d: 9,  text: "Click any event in the timeline and a written note\nappears in about a second and a half." },
+    { t: 124, d: 9,  text: "The AI reads only the facts the live feed provides.\nIt will not invent a player name or a made-up statistic." },
+    { t: 135, d: 10, text: "Every read can become a signed record — Mint moment writes\nthe score, minute, and price to Solana devnet, wallet-signed." },
+    { t: 147, d: 11, text: "You can also ask it a question directly. It answers\nin plain language, grounded in what is on the pitch." },
+    { t: 160, d: 9,  text: `Here is a second fixture: ${bName}.\nOdds and event log come straight from the same feed.` },
+    { t: 171, d: 10, text: "Before kickoff, call the 1X2 against the live line.\nGet it right and a streak builds — miss it, and it resets." },
+    { t: 183, d: 9,  text: "Where the book has no live price yet, MatchMind derives one\nfrom score and time remaining with a Poisson model." },
+    { t: 194, d: 8,  text: "Connect a Solana wallet to link the on-chain layer.\nThe wallet panel explains exactly what linking does." },
+    { t: 204, d: 10, text: "Back on the pricing page, Grab a pass does something —\na real devnet SOL payment, confirmed on-chain, receipt kept." },
+    { t: 216, d: 8,  text: "MatchMind — live data, grounded AI, a streak worth defending,\nbuilt on Solana." },
+    { t: 226, d: 7,  text: "matchmind-omega.vercel.app\ngithub.com/nayrbryanGaming/matchmind" },
   ];
 }
 
@@ -127,7 +137,7 @@ const TITLE_CARD = `data:text/html;charset=utf-8,${encodeURIComponent(`<!doctype
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log("MatchMind Demo Generator v5 — 4K / 3 min / zero blank frames\n");
+  console.log("MatchMind Demo Generator v7 — 8K / ~4 min / zero blank frames\n");
 
   const { a, b } = await pickFixtures();
   console.log(`Fixture A (live): ${a.homeTeam} vs ${a.awayTeam} [${a.id}] ${a.homeScore}-${a.awayScore} @ ${a.minute}'`);
@@ -175,24 +185,39 @@ async function main() {
     if (wait > 0) await sleep(wait);
   };
 
+  // A fixed nav bar can sit over the top of a freshly-scrolled-into-view
+  // element; force + a settle delay keeps one flaky click from aborting an
+  // otherwise-good multi-minute recording.
+  const safeClick = async (locator) => {
+    try {
+      await locator.scrollIntoViewIfNeeded({ timeout: 5000 });
+      await sleep(300);
+      await locator.click({ force: true, timeout: 8000 });
+      return true;
+    } catch (e) {
+      console.log("  [safeClick] skipped:", e.message.split("\n")[0]);
+      return false;
+    }
+  };
+
   // ── 0:00 Title card ────────────────────────────────────────────────────────
   await page.goto(TITLE_CARD);
   await at(4);
 
-  // ── 0:04 SCENE 1 — Landing (to ~0:47) ─────────────────────────────────────
+  // ── 0:04 SCENE 1 — Landing, through the on-chain section (to ~0:59) ──────
   console.log("[SCENE 1] Landing...");
   await nav(SITE, "h1");
   await at(14); // dwell on hero
 
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 13; i++) {
     await page.evaluate(() => window.scrollBy({ top: 300, behavior: "smooth" }));
     await sleep(1500);
   }
-  await sleep(2000);
+  await sleep(2500); // dwell on the on-chain section
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await at(46);
+  await at(59);
 
-  // ── 0:47 SCENE 2 — Match list (to ~1:16) ──────────────────────────────────
+  // ── 0:60 SCENE 2 — Match list (to ~1:31) ──────────────────────────────────
   console.log("[SCENE 2] Match list...");
   await nav(`${SITE}/match`, 'a[href^="/match/"]');
   await sleep(3000);
@@ -203,11 +228,11 @@ async function main() {
 
   for (const label of ["LIVE", "UPCOMING", "FINISHED", "ALL"]) {
     const btn = page.locator("button").filter({ hasText: new RegExp(`^${label}$`, "i") }).first();
-    if (await btn.count()) { await btn.click(); await sleep(2000); }
+    if (await btn.count()) { await safeClick(btn); await sleep(2000); }
   }
-  await at(76);
+  await at(91);
 
-  // ── 1:16 SCENE 3 — Live match detail (to ~2:12) ───────────────────────────
+  // ── 1:31 SCENE 3 — Live match detail + Moment Mint (to ~2:39) ─────────────
   console.log(`[SCENE 3] ${a.homeTeam} vs ${a.awayTeam}...`);
   await nav(`${SITE}/match/${a.id}`, "main, h1");
   await sleep(6000); // auto commentary
@@ -219,51 +244,74 @@ async function main() {
   const n = await evtBtns.count();
   console.log(`  ${n} event buttons`);
   for (let i = 0; i < Math.min(n, 2); i++) {
-    await evtBtns.nth(i).click();
+    await safeClick(evtBtns.nth(i));
     await sleep(5000);
   }
 
+  // Moment Mint button lives inline on each AI commentary bubble — dwell so
+  // it reads clearly before moving on.
+  const mintBtn = page.locator("button", { hasText: "Mint moment" }).first();
+  if (await mintBtn.count()) await mintBtn.scrollIntoViewIfNeeded().catch(() => {});
+  await sleep(4000);
+
   // Ask-the-AI live demo
   const input = page.locator("input[placeholder*='Ask'], textarea[placeholder*='Ask']").first();
-  if (await input.count()) {
-    await input.click();
+  if (await input.count() && await safeClick(input)) {
     await input.pressSequentially("Who is more likely to score next and why?", { delay: 45 });
     await sleep(600);
     await input.press("Enter");
     await sleep(9000); // let the grounded answer render
   }
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await at(132);
+  await at(159);
 
-  // ── 2:12 SCENE 4 — Second fixture (to ~2:36) ──────────────────────────────
+  // ── 2:39 SCENE 4 — Second fixture + Prediction Streak (to ~3:13) ──────────
   console.log(`[SCENE 4] ${b.homeTeam} vs ${b.awayTeam}...`);
   await nav(`${SITE}/match/${b.id}`, "main, h1");
-  await sleep(5000);
-  await page.evaluate(() => window.scrollBy({ top: 200, behavior: "smooth" }));
   await sleep(3000);
-  const evtBtns2 = page.locator("button").filter({ hasText: /GOAL|KO|SUB|HT|FT/i });
-  if (await evtBtns2.count()) { await evtBtns2.first().click(); await sleep(5000); }
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await at(156);
 
-  // ── 2:36 SCENE 5 — Wallet + closing (to ~3:06) ────────────────────────────
-  console.log("[SCENE 5] Wallet + closing...");
+  // Fixture B is picked pre-kickoff when available, so the 1X2 panel shows
+  // live pick buttons rather than the "predictions closed" state.
+  await page.evaluate(() => window.scrollBy({ top: 260, behavior: "smooth" }));
+  await sleep(1500);
+  const oddsPickBtn = page.locator("button").filter({ hasText: /\d\.\d{2}/ }).first();
+  if (await oddsPickBtn.count()) {
+    await safeClick(oddsPickBtn);
+    await sleep(3500); // let "LOCKED IN" render
+  }
+
+  const evtBtns2 = page.locator("button").filter({ hasText: /GOAL|KO|SUB|HT|FT/i });
+  if (await evtBtns2.count()) { await safeClick(evtBtns2.first()); await sleep(4000); }
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  await at(193);
+
+  // ── 3:13 SCENE 5 — Wallet, Fan Pass payment, and closing (to ~3:53) ───────
+  console.log("[SCENE 5] Wallet, Fan Pass, closing...");
   await nav(SITE, "h1");
   await sleep(2000);
 
   const walletBtn = page.locator("button, [role='button']").filter({ hasText: /connect wallet/i }).first();
-  if (await walletBtn.count()) {
-    await walletBtn.click();
-    await sleep(4500);
+  if (await walletBtn.count() && await safeClick(walletBtn)) {
+    await sleep(3500);
     await page.keyboard.press("Escape");
-    await sleep(1000);
+    await sleep(500);
   }
+
+  // Scroll to the pricing tiers and trigger the real Fan Pass payment button —
+  // with no wallet extension in this headless run it surfaces the same
+  // connect-wallet guard a real visitor sees, proof the button is wired, not decorative.
+  const grabPass = page.locator("button", { hasText: /Grab a pass/i }).first();
+  if (await grabPass.count()) {
+    await safeClick(grabPass);
+    await sleep(2500);
+  }
+
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await at(180);
+  await at(234);
 
   // Closing title card
   await page.goto(TITLE_CARD);
-  await at(187);
+  await at(241);
 
   console.log("[REC] closing browser...");
   await ctx.close();
@@ -315,7 +363,7 @@ async function main() {
   fs.rmSync(TMP_DIR, { recursive: true, force: true });
 
   console.log(`
-DONE — 8K (7680×4320) / ~3:03
+DONE — 8K (7680×4320) / ~3:55
   V1: ${OUT_V1}
   V2: ${OUT_V2}  (voiceover + burned subtitles)
   SRT: ${SRT_FILE}
