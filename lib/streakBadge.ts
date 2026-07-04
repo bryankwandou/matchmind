@@ -1,5 +1,6 @@
-// Streak Badge — mints a real fixed-supply SPL token on Solana devnet at each
-// streak milestone (5, 10, 25, 50...). One transaction: create the mint,
+// Streak Badge — mints a real fixed-supply SPL token on-chain at each streak
+// milestone (5, 10, 25, 50...), on whichever cluster lib/network.ts configures.
+// One transaction: create the mint,
 // mint the single unit to the caller's wallet, then permanently revoke mint
 // authority so supply can never exceed 1 — a genuine on-chain collectible,
 // not just a log entry. Milestone context rides along in a bundled memo.
@@ -24,7 +25,7 @@ import {
   createSetAuthorityInstruction,
   AuthorityType,
 } from "@solana/spl-token";
-import { MEMO_PROGRAM_ID, devnetConnection } from "./moments";
+import { MEMO_PROGRAM_ID, appConnection } from "./moments";
 
 export const STREAK_MILESTONES = [5, 10, 25, 50, 100] as const;
 
@@ -82,4 +83,4 @@ export async function buildStreakBadgeTx(
   return { tx, mint };
 }
 
-export { devnetConnection };
+export { appConnection };

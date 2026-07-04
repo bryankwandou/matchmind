@@ -62,10 +62,14 @@ export default function Navigation() {
         {/* Center links */}
         <div style={{ display: "flex", gap: "32px", alignItems: "center" }}
           className="hidden-mobile">
-          {["How it works", "Live matches", "Features"].map((label) => (
+          {["How it works", "Live matches", "Features", "Pricing"].map((label) => (
             <a
               key={label}
-              href={label === "Live matches" ? "/match" : `#${label.toLowerCase().replace(/\s+/g, "-")}`}
+              href={
+                label === "Live matches" ? "/match" :
+                label === "Pricing" ? "/pricing" :
+                `#${label.toLowerCase().replace(/\s+/g, "-")}`
+              }
               style={{
                 fontSize: "14px",
                 color: "var(--text-2)",

@@ -34,7 +34,7 @@ const CARDS = [
   {
     num: "05",
     title: "The price on the pricing page is a real price",
-    body: "Grab a pass and the button sends actual devnet SOL to a fixed address, confirmed on-chain, receipt included. Nothing behind it says \"coming soon.\"",
+    body: "Grab a pass and the button sends a real USDC payment on the same network the wallet is connected to, confirmed on-chain, receipt included. Nothing behind it says \"coming soon.\"",
     accent: "var(--gold)",
   },
 ];
