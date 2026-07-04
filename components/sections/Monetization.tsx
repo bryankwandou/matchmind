@@ -2,8 +2,21 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import PricingCTA from "@/components/PricingCTA";
+import type { TierId } from "@/lib/fanPass";
 
-const TIERS = [
+const TIERS: {
+  name: string;
+  price: string;
+  period: string;
+  color: string;
+  features: string[];
+  cta: string;
+  ctaBg: string;
+  ctaColor: string;
+  highlight: boolean;
+  tierId?: TierId;
+}[] = [
   {
     name: "Free",
     price: "$0",
@@ -36,6 +49,7 @@ const TIERS = [
     ctaBg: "var(--green)",
     ctaColor: "#000",
     highlight: true,
+    tierId: "fan_pass",
   },
   {
     name: "Tournament",
@@ -53,6 +67,7 @@ const TIERS = [
     ctaBg: "#7c3aed",
     ctaColor: "#fff",
     highlight: false,
+    tierId: "tournament",
   },
 ];
 
@@ -176,24 +191,39 @@ How it pays
               ))}
             </ul>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                width: "100%",
-                padding: "11px",
-                borderRadius: "9px",
-                background: tier.ctaBg,
-                color: tier.ctaColor,
-                fontSize: "13px",
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: "-0.01em",
-                border: tier.highlight ? "none" : "1px solid var(--border)",
-              } as React.CSSProperties}
-            >
-              {tier.cta}
-            </motion.button>
+            {tier.tierId ? (
+              <PricingCTA
+                tier={tier.tierId}
+                label={tier.cta}
+                bg={tier.ctaBg}
+                color={tier.ctaColor}
+                outlined={!tier.highlight}
+              />
+            ) : (
+              <motion.a
+                href="/match"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "11px",
+                  borderRadius: "9px",
+                  background: tier.ctaBg,
+                  color: tier.ctaColor,
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  letterSpacing: "-0.01em",
+                  border: "1px solid var(--border)",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  boxSizing: "border-box",
+                } as React.CSSProperties}
+              >
+                {tier.cta}
+              </motion.a>
+            )}
           </motion.div>
         ))}
       </div>

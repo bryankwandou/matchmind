@@ -3,13 +3,16 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
+import { hitMilestone } from "@/lib/streakBadge";
+import StreakBadge from "./StreakBadge";
+import RoastCard from "./RoastCard";
 
 // Prediction Streak — call the 1X2 before kickoff, with TxLINE odds as the
 // baseline. Picks lock at kickoff, resolve at full time, and feed a
 // wallet-linked streak counter + leaderboard.
 
 type Pick = "1" | "X" | "2";
-type StoredPick = { pick: Pick; at: number; resolved?: boolean; correct?: boolean };
+type StoredPick = { pick: Pick; at: number; price: number; resolved?: boolean; correct?: boolean };
 type PickMap = Record<string, StoredPick>;
 type Streak = { count: number; best: number };
 type BoardRow = { wallet: string; streak: number; best: number };
@@ -56,6 +59,7 @@ export default function PredictionStreak({
   const [streak, setStreak] = useState<Streak>({ count: 0, best: 0 });
   const [board, setBoard] = useState<BoardRow[]>([]);
   const [justResolved, setJustResolved] = useState<"win" | "loss" | null>(null);
+  const [milestoneHit, setMilestoneHit] = useState<number | null>(null);
 
   const syncBoard = useCallback(async (s: Streak) => {
     if (!publicKey) return;
@@ -90,6 +94,7 @@ export default function PredictionStreak({
       setStreak(next);
       setMyPick(picks[fixtureId]);
       setJustResolved(correct ? "win" : "loss");
+      setMilestoneHit(correct ? hitMilestone(next.count) : null);
       syncBoard(next);
     } else {
       setStreak(s);
@@ -113,9 +118,10 @@ export default function PredictionStreak({
   function place(pick: Pick) {
     if (status !== "pre" || myPick) return;
     const picks = loadJson<PickMap>(PICKS_KEY, {});
+    const price = pick === "1" ? odds.home : pick === "X" ? odds.draw : odds.away;
     // Click handler, never runs during render — timestamping the pick is safe.
     // eslint-disable-next-line react-hooks/purity
-    picks[fixtureId] = { pick, at: Date.now() };
+    picks[fixtureId] = { pick, at: Date.now(), price };
     saveJson(PICKS_KEY, picks);
     setMyPick(picks[fixtureId]);
   }
@@ -229,6 +235,22 @@ export default function PredictionStreak({
                   ? `Called it. Streak moves to ${streak.count}.`
                   : "Wrong side this time — streak resets, best stands."}
               </motion.p>
+            )}
+            {justResolved && myPick && (
+              <RoastCard
+                homeTeam={homeTeam}
+                awayTeam={awayTeam}
+                pickLabel={pickLabel[myPick.pick]}
+                result={justResolved}
+                priceTaken={myPick.price}
+                finalScore={{ home: homeScore, away: awayScore }}
+                streak={streak.count}
+              />
+            )}
+            {milestoneHit && (
+              <div style={{ marginTop: "10px" }}>
+                <StreakBadge milestone={milestoneHit} best={streak.best} />
+              </div>
             )}
           </div>
         ) : (
