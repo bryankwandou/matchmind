@@ -1,6 +1,7 @@
-// Moment Mint — writes a match moment on-chain as a Solana devnet Memo transaction.
-// The memo carries score, minute, odds at that second, and the AI read, signed by
-// the user's wallet. Verifiable on explorer.solana.com (?cluster=devnet).
+// Moment Mint — writes a match moment on-chain as a Solana Memo transaction.
+// The memo carries score, minute, odds at that second, and the AI read, signed
+// by the user's wallet. Runs on whichever cluster lib/network.ts configures —
+// the same one the wallet connects to and the same one Fan Pass pays into.
 
 import { Buffer } from "buffer";
 import {
@@ -8,20 +9,19 @@ import {
   PublicKey,
   Transaction,
   TransactionInstruction,
-  clusterApiUrl,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
+import { SOLANA_RPC_URL, IS_DEVNET, explorerUrl } from "./network";
 
 export const MEMO_PROGRAM_ID = new PublicKey(
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
 );
 
-// Dedicated devnet connection — moment mints always land on devnet regardless of
-// the wallet provider's default cluster, so no real SOL is ever spent.
-let _devnet: Connection | null = null;
-export function devnetConnection(): Connection {
-  if (!_devnet) _devnet = new Connection(clusterApiUrl("devnet"), "confirmed");
-  return _devnet;
+// One connection shared by every on-chain feature — same RPC the wallet uses.
+let _conn: Connection | null = null;
+export function appConnection(): Connection {
+  if (!_conn) _conn = new Connection(SOLANA_RPC_URL, "confirmed");
+  return _conn;
 }
 
 export type Moment = {
@@ -62,8 +62,11 @@ export function buildMemoTx(payer: PublicKey, payload: string): Transaction {
 }
 
 // Devnet SOL is free — top the wallet up automatically if it can't cover fees.
-export async function ensureDevnetSol(pubkey: PublicKey): Promise<void> {
-  const conn = devnetConnection();
+// No-op on mainnet/testnet: there is no faucet, and a real wallet is expected
+// to already hold enough SOL for network fees.
+export async function ensureFunded(pubkey: PublicKey): Promise<void> {
+  if (!IS_DEVNET) return;
+  const conn = appConnection();
   const balance = await conn.getBalance(pubkey);
   if (balance >= 0.001 * LAMPORTS_PER_SOL) return;
   try {
@@ -76,5 +79,5 @@ export async function ensureDevnetSol(pubkey: PublicKey): Promise<void> {
 }
 
 export function explorerTxUrl(signature: string): string {
-  return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+  return explorerUrl(`tx/${signature}`);
 }

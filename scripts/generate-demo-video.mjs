@@ -72,7 +72,7 @@ function buildCues(a, b) {
     { t: 171, d: 10, text: "Before kickoff, call the 1X2 against the live line.\nGet it right and a streak builds — miss it, and it resets." },
     { t: 183, d: 9,  text: "Where the book has no live price yet, MatchMind derives one\nfrom score and time remaining with a Poisson model." },
     { t: 194, d: 8,  text: "Connect a Solana wallet to link the on-chain layer.\nThe wallet panel explains exactly what linking does." },
-    { t: 204, d: 10, text: "Back on the pricing page, Grab a pass does something —\na real devnet SOL payment, confirmed on-chain, receipt kept." },
+    { t: 204, d: 10, text: "Back on the pricing page, Grab a pass does something —\na real USDC payment on-chain, confirmed and receipted." },
     { t: 216, d: 8,  text: "MatchMind — live data, grounded AI, a streak worth defending,\nbuilt on Solana." },
     { t: 226, d: 7,  text: "matchmind-omega.vercel.app\ngithub.com/nayrbryanGaming/matchmind" },
   ];

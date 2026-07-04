@@ -7,10 +7,11 @@ import {
   Moment,
   momentMemoPayload,
   buildMemoTx,
-  devnetConnection,
-  ensureDevnetSol,
+  appConnection,
+  ensureFunded,
   explorerTxUrl,
 } from "@/lib/moments";
+import { IS_DEVNET } from "@/lib/network";
 
 type MintState =
   | { phase: "idle" }
@@ -30,11 +31,11 @@ export default function MomentMint({ moment, compact }: { moment: Moment; compac
     if (state.phase === "minting") return;
 
     try {
-      setState({ phase: "minting", step: "Checking devnet balance" });
-      await ensureDevnetSol(publicKey);
+      setState({ phase: "minting", step: "Checking balance" });
+      await ensureFunded(publicKey);
 
       setState({ phase: "minting", step: "Waiting for wallet signature" });
-      const conn = devnetConnection();
+      const conn = appConnection();
       const tx = buildMemoTx(publicKey, momentMemoPayload(moment));
       const bh = await conn.getLatestBlockhash();
       tx.recentBlockhash = bh.blockhash;
@@ -50,8 +51,10 @@ export default function MomentMint({ moment, compact }: { moment: Moment; compac
       const message = /reject|cancel|denied/i.test(raw)
         ? "Signature declined in the wallet."
         : /insufficient|0x1\b/i.test(raw)
-        ? "Not enough devnet SOL and the faucet is rate-limited. Try again in a minute."
-        : "Mint failed — devnet may be busy. Try again shortly.";
+        ? IS_DEVNET
+          ? "Not enough devnet SOL for the fee and the faucet is rate-limited. Try again in a minute."
+          : "Not enough SOL in this wallet to cover the network fee."
+        : "Mint failed — network may be busy. Try again shortly.";
       setState({ phase: "error", message });
     }
   }

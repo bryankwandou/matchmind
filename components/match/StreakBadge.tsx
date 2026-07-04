@@ -3,8 +3,9 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { ensureDevnetSol, explorerTxUrl } from "@/lib/moments";
-import { buildStreakBadgeTx, devnetConnection } from "@/lib/streakBadge";
+import { ensureFunded, explorerTxUrl } from "@/lib/moments";
+import { buildStreakBadgeTx, appConnection } from "@/lib/streakBadge";
+import { IS_DEVNET } from "@/lib/network";
 
 type BadgeState =
   | { phase: "idle" }
@@ -13,7 +14,7 @@ type BadgeState =
   | { phase: "error"; message: string };
 
 // Fires when the caller hits a streak milestone — offers to mint a real
-// fixed-supply token on devnet as proof, one per milestone, ever.
+// fixed-supply token on-chain as proof, one per milestone, ever.
 export default function StreakBadge({ milestone, best }: { milestone: number; best: number }) {
   const { connected, publicKey, sendTransaction } = useWallet();
   const [state, setState] = useState<BadgeState>({ phase: "idle" });
@@ -26,10 +27,10 @@ export default function StreakBadge({ milestone, best }: { milestone: number; be
     if (state.phase === "minting") return;
 
     try {
-      setState({ phase: "minting", step: "Checking devnet balance" });
-      await ensureDevnetSol(publicKey);
+      setState({ phase: "minting", step: "Checking balance" });
+      await ensureFunded(publicKey);
 
-      const conn = devnetConnection();
+      const conn = appConnection();
       setState({ phase: "minting", step: "Building badge mint" });
       const { tx, mint: mintKeypair } = await buildStreakBadgeTx(conn, publicKey, milestone, best);
       const bh = await conn.getLatestBlockhash();
@@ -39,7 +40,7 @@ export default function StreakBadge({ milestone, best }: { milestone: number; be
       setState({ phase: "minting", step: "Waiting for wallet signature" });
       const signature = await sendTransaction(tx, conn, { signers: [mintKeypair] });
 
-      setState({ phase: "minting", step: "Confirming on devnet" });
+      setState({ phase: "minting", step: "Confirming on-chain" });
       await conn.confirmTransaction({ signature, ...bh }, "confirmed");
 
       setState({ phase: "done", signature, mint: mintKeypair.publicKey.toBase58() });
@@ -48,8 +49,10 @@ export default function StreakBadge({ milestone, best }: { milestone: number; be
       const message = /reject|cancel|denied/i.test(raw)
         ? "Signature declined in the wallet."
         : /insufficient|0x1\b/i.test(raw)
-        ? "Not enough devnet SOL and the faucet is rate-limited. Try again shortly."
-        : "Badge mint failed — devnet may be busy. Try again shortly.";
+        ? IS_DEVNET
+          ? "Not enough devnet SOL for the fee and the faucet is rate-limited. Try again shortly."
+          : "Not enough SOL in this wallet to cover the network fee."
+        : "Badge mint failed — network may be busy. Try again shortly.";
       setState({ phase: "error", message });
     }
   }
