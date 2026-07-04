@@ -38,7 +38,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         homeScore: match.score.home,
         awayScore: match.score.away,
         minute: match.minute,
-        status: match.status === "ht" || match.status === "ft" ? "finished" : match.status,
+        // Half time is still in play — only full time counts as finished,
+        // otherwise streak picks would resolve at HT on a partial score.
+        status: match.status === "ft" ? "finished" : match.status === "ht" ? "live" : match.status,
         stage: match.stage,
         startTime: match.startTime,
         homeOdds: hasOdds ? match.odds.home : null,

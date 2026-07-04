@@ -18,7 +18,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob:",
-      "connect-src 'self' https://txline.txodds.com https://api.groq.com",
+      "connect-src 'self' https://txline.txodds.com https://api.groq.com https://api.devnet.solana.com wss://api.devnet.solana.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
         // CORS: only allow same-origin on API routes
         source: "/api/(.*)",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_APP_URL ?? "*" },
+          { key: "Access-Control-Allow-Origin", value: (process.env.NEXT_PUBLIC_APP_URL ?? "*").replace(/[^ -~]/g, "").trim() || "*" },
           { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
           { key: "Access-Control-Max-Age", value: "86400" },

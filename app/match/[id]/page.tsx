@@ -5,6 +5,10 @@ import { useRef, useState, useEffect, use } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { AuroraBackground, SpotlightGrid } from "@/components/ui/AuroraBackground";
+import MomentMint from "@/components/match/MomentMint";
+import PredictionStreak from "@/components/match/PredictionStreak";
+import ShareCard from "@/components/match/ShareCard";
+import type { Moment } from "@/lib/moments";
 
 type MatchEvent = {
   id: string;
@@ -196,7 +200,7 @@ function EventRow({ event, homeTeam }: { event: MatchEvent; homeTeam: string }) 
   );
 }
 
-function CommentaryBubble({ msg }: { msg: CommentaryMessage }) {
+function CommentaryBubble({ msg, moment }: { msg: CommentaryMessage; moment?: Moment }) {
   const isEvent = msg.role === "event";
 
   return (
@@ -239,6 +243,11 @@ function CommentaryBubble({ msg }: { msg: CommentaryMessage }) {
             border: "1px solid var(--border)",
           }}>
             <p style={{ fontSize: "12px", color: "var(--text-2)", lineHeight: 1.6 }}>{msg.content}</p>
+            {moment && (
+              <div style={{ marginTop: "8px" }}>
+                <MomentMint moment={moment} compact />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -587,6 +596,17 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           </div>
         </motion.div>
 
+        {/* Prediction streak — call the 1X2 before kickoff */}
+        <PredictionStreak
+          fixtureId={match.id}
+          homeTeam={match.homeTeam}
+          awayTeam={match.awayTeam}
+          homeScore={match.homeScore}
+          awayScore={match.awayScore}
+          status={match.status}
+          odds={{ home: match.homeOdds, draw: match.drawOdds, away: match.awayOdds }}
+        />
+
         {/* Main 2-col layout */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "16px" }} className="match-layout">
           {/* Left — commentary feed */}
@@ -615,7 +635,18 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
               <span style={{ fontSize: "11px", color: "var(--text-3)", flex: 1, textAlign: "center" }}>
                 MatchMind · live read
               </span>
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                <ShareCard data={{
+                  homeTeam: match.homeTeam,
+                  awayTeam: match.awayTeam,
+                  homeScore: match.homeScore,
+                  awayScore: match.awayScore,
+                  minute: match.minute,
+                  status: match.status,
+                  stage: match.stage,
+                  odds: { home: match.homeOdds, draw: match.drawOdds, away: match.awayOdds },
+                  read: [...commentary].reverse().find((m) => m.role === "ai")?.content ?? "",
+                }} />
                 {AI_STYLE_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -645,7 +676,21 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             >
               <AnimatePresence>
                 {commentary.map((msg, i) => (
-                  <CommentaryBubble key={i} msg={msg} />
+                  <CommentaryBubble
+                    key={i}
+                    msg={msg}
+                    moment={msg.role === "ai" ? {
+                      fixtureId: match.id,
+                      homeTeam: match.homeTeam,
+                      awayTeam: match.awayTeam,
+                      homeScore: match.homeScore,
+                      awayScore: match.awayScore,
+                      minute: match.minute,
+                      eventType: msg.eventType ?? "read",
+                      odds: { home: match.homeOdds, draw: match.drawOdds, away: match.awayOdds },
+                      read: msg.content,
+                    } : undefined}
+                  />
                 ))}
               </AnimatePresence>
 
