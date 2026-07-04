@@ -467,6 +467,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   useEffect(() => {
     if (!dataLoaded || !match) return;
     const lastGoal = [...match.events].reverse().find((e) => e.type === "goal" || e.type === "penalty");
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     if (lastGoal) triggerCommentary(lastGoal);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoaded]);
