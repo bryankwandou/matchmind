@@ -155,9 +155,11 @@ async function main() {
   const ctx = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
     deviceScaleFactor: 2, // retina-sharp; do NOT also pass --force-device-scale-factor
-    // Capture at native 4K (1920×1080 @2x device pixels = 3840×2160, recorded 1:1)
-    // so the 8K upscale feeds off genuine detail — sharp, not blocky.
-    recordVideo: { dir: OUT_DIR, size: { width: 3840, height: 2160 } },
+    // recordVideo size MUST equal the CSS viewport. Playwright captures at CSS
+    // resolution and never upscales — a larger size here pastes the 1920×1080
+    // page unscaled into the corner of a gray canvas (the v7.0 defect).
+    // Upscaling to 8K happens in ffmpeg, from a full-frame source.
+    recordVideo: { dir: OUT_DIR, size: { width: 1920, height: 1080 } },
   });
 
   // Any document repaint is brand-navy, never white.
@@ -325,18 +327,28 @@ async function main() {
   fs.renameSync(path.join(OUT_DIR, webms[0].f), RAW_WEBM);
   console.log(`Raw WebM: ${(fs.statSync(RAW_WEBM).size / 1048576).toFixed(1)} MB`);
 
+  // Low-memory x264: preset medium at 8K OOM'd on this machine (x264 malloc
+  // failures with ~600MB free); ultrafast with no lookahead stays under.
+  const X264 = [
+    "-c:v", "libx264", "-preset", "ultrafast",
+    "-x264-params", "rc-lookahead=0:ref=1:bframes=0", "-threads", "2",
+    "-crf", "20", "-profile:v", "high", "-level", "6.2", "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+  ];
+
   // ── ENCODE V1 — video only, 8K (7680×4320) ────────────────────────────────
   await ffmpeg([
     "-y", "-i", RAW_WEBM,
     "-vf", "scale=7680:4320:flags=lanczos",
-    "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-    "-profile:v", "high", "-level", "6.2", "-pix_fmt", "yuv420p",
-    "-movflags", "+faststart", "-an",
+    ...X264, "-an",
     OUT_V1,
   ]);
   console.log("V1 saved:", OUT_V1, `(${(fs.statSync(OUT_V1).size/1048576).toFixed(1)} MB)`);
 
   // ── ENCODE V2 — video + positioned voiceover + burned subtitles ───────────
+  // Subtitles burn at the SOURCE resolution, before the upscale — libass sizes
+  // fonts against the render resolution, so styling after the 8K scale made
+  // the captions fill the whole frame.
   const srtEsc = SRT_FILE.replace(/\\/g, "/").replace(":", "\\:");
   const inputs = ["-i", RAW_WEBM];
   cueWavs.forEach(w => inputs.push("-i", w));
@@ -348,19 +360,19 @@ async function main() {
   await ffmpeg([
     "-y", ...inputs,
     "-filter_complex", `${delays};${mix}`,
-    "-vf", `scale=7680:4320:flags=lanczos,subtitles='${srtEsc}':force_style='FontName=Arial,FontSize=40,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=4,Shadow=2,Alignment=2,MarginV=100'`,
+    "-vf", `subtitles='${srtEsc}':force_style='FontName=Arial,FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=2,Shadow=1,Alignment=2,MarginV=28',scale=7680:4320:flags=lanczos`,
     "-map", "0:v:0", "-map", "[vo]",
-    "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-    "-profile:v", "high", "-level", "6.2", "-pix_fmt", "yuv420p",
-    "-movflags", "+faststart",
+    ...X264,
     "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
     "-shortest",
     OUT_V2,
   ]);
   console.log("V2 saved:", OUT_V2, `(${(fs.statSync(OUT_V2).size/1048576).toFixed(1)} MB)`);
 
-  fs.unlinkSync(RAW_WEBM);
-  fs.rmSync(TMP_DIR, { recursive: true, force: true });
+  // Keep the raw capture AND cue WAVs until both encodes have been visually
+  // verified — deleting them early cost a full re-record once already.
+  console.log("Raw capture kept for verification:", RAW_WEBM);
+  console.log("Cue WAVs kept for re-encode:", TMP_DIR);
 
   console.log(`
 DONE — 8K (7680×4320) / ~3:55
