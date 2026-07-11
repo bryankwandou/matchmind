@@ -2,7 +2,22 @@
 
 Live deployed URL: **https://matchmind-omega.vercel.app**
 
-MatchMind turns every moment of the 2026 World Cup into a conversation. When a goal happens, the odds shift, or a red card changes the game, MatchMind gives you a clear, human explanation in seconds — powered by TxLINE live data and Groq AI.
+MatchMind turns every moment of the 2026 World Cup into a conversation. When a goal happens, the odds shift, or a red card changes the game, MatchMind gives you a clear, human explanation in seconds — powered by TxLINE live data and Groq AI. Past the commentary, every call a fan makes leaves an on-chain receipt.
+
+---
+
+## For Judges — 60-Second Walkthrough
+
+**Nothing to install. Open the deployed app and follow this path:**
+
+1. **[matchmind-omega.vercel.app](https://matchmind-omega.vercel.app)** — scroll the landing page. The "Every call leaves a receipt" section (past the commentary) is the differentiator, not a footnote.
+2. **Open any live match** → the left panel writes an AI note ~1.5s after each event; the right panel is the live scoreboard from TxLINE. Every commentary bubble has a **Mint moment** button (writes score + minute + odds to Solana).
+3. **Open an upcoming match** → the **Call it before kickoff** panel lets you pick the 1X2 against the live TxLINE line. Hits build a streak; a milestone streak offers to mint a fixed-supply badge token.
+4. **[/pricing](https://matchmind-omega.vercel.app/pricing)** → the Fan Pass is a **real USDC payment on Solana** (not a mock checkout), with a working coupon field (`WORLDCUP26` = 15% off) and an on-chain receipt.
+
+Everything runs on **one Solana cluster** (devnet by default) — the wallet, moment mint, streak badge, and USDC payment all read a single network config, so nothing ever lands on a different chain.
+
+To run it locally instead, jump to [Local Development](#local-development). The app works with no keys (demo mode mirrors TxLINE's exact response shape).
 
 ---
 
@@ -73,6 +88,20 @@ The data quality and cryptographic verification model are genuinely differentiat
 
 ---
 
+## The On-Chain Layer
+
+Commentary is the entry point; the product is the accountability layer on top. Three distinct Solana mechanics, all reading one shared network config (`lib/network.ts`, `NEXT_PUBLIC_SOLANA_NETWORK`, devnet by default):
+
+| Feature | On-chain mechanic | Where |
+|---------|-------------------|-------|
+| **Moment Mint** | Memo transaction carrying score, minute, and odds-at-that-second, signed by the fan's wallet | inline on every commentary bubble |
+| **Streak Badge** | Fixed-supply SPL token mint with **mint authority revoked in the same transaction** — one unit, permanently | fires on a milestone streak (5/10/25/50/100) |
+| **Fan Pass** | Real USDC `transfer_checked` to the treasury, confirmed on-chain, server-validated coupon codes | `/pricing` |
+
+USDC mint addresses are Circle's official ones — devnet `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`, mainnet `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`. Because the price is a dollar figure, USDC (1:1 peg) means the quoted price is the paid price — no conversion step. Devnet USDC comes from [Circle's faucet](https://faucet.circle.com/); the app links it automatically when a wallet is short.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -80,9 +109,9 @@ The data quality and cryptographic verification model are genuinely differentiat
 | Framework | Next.js 16.2.9 (App Router, TypeScript) |
 | Styling | Tailwind CSS v4, custom CSS variables |
 | Animations | Framer Motion v12 (160+ animation instances) |
-| AI | Groq SDK — llama-3.3-70b-versatile (commentary), llama-3.1-8b-instant (previews) |
-| Live data | TxLINE by TxODDS — on-chain/off-chain hybrid |
-| Blockchain | Solana (mainnet subscription, wallet adapter) |
+| AI | Groq SDK — grounded commentary + free-form match Q&A |
+| Live data | TxLINE by TxODDS — live scores, odds, SSE event stream |
+| Blockchain | Solana — wallet adapter, memo/SPL/USDC on one cluster |
 | Deployment | Vercel (auto-deploy from main branch) |
 
 ---
