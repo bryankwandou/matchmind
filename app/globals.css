@@ -5,20 +5,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Deep tinted base — cool navy, never pure black */
-  --bg: #070a12;
-  --bg-2: #0c111c;
-  --bg-3: #121826;
-  --bg-card: #0f1420;
-  --border: #212a3d;
-  --border-2: #2e3a52;
-  --text: #eef1f6;
-  --text-2: #93a0b5;
-  --text-3: #5d6a80;
+  /* Arena base — floodlit pitch at night: deep grass-black, never navy, never pure black */
+  --bg: #060d09;
+  --bg-2: #0a1410;
+  --bg-3: #101c15;
+  --bg-card: #0c1710;
+  --border: #1d2c22;
+  --border-2: #2a4032;
+  --text: #eef6f0;
+  --text-2: #95a89c;
+  --text-3: #5e7267;
   /* Reusable surface + bar gradients so panels lift off the background */
-  --grad-card: linear-gradient(158deg, #141b2c 0%, #0e1320 100%);
-  --grad-bar: linear-gradient(180deg, #171f31 0%, #10151f 100%);
+  --grad-card: linear-gradient(158deg, #13221a 0%, #0b1510 100%);
+  --grad-bar: linear-gradient(180deg, #16261c 0%, #0e1a12 100%);
   --grad-accent: linear-gradient(135deg, var(--green) 0%, #00c4ff 50%, var(--purple) 100%);
+  /* Stadium language */
+  --pitch-line: rgba(226, 255, 238, 0.5);   /* chalk marking, use at low alpha */
+  --floodlight: #dff4ff;                     /* cool floodlight bloom */
+  --scoreboard: #ffb937;                     /* LED scoreboard amber */
+  --card-yellow: #ffce2e;                    /* booking: caution */
+  --card-red: #e5333f;                       /* booking: sent off */
   --green: #00e87a;
   --green-dim: #00e87a22;
   --green-glow: #00e87a44;
