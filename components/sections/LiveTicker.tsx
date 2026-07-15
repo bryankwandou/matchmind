@@ -37,12 +37,14 @@ function TickerItem({ item }: { item: typeof TICKER_ITEMS[0] }) {
       <span style={{ fontSize: "13px", color: "var(--text)" }}>{item.home}</span>
       <span style={{
         fontSize: "13px",
-        fontWeight: 700,
-        color: "var(--text)",
-        background: "var(--bg-card)",
+        fontWeight: 800,
+        color: "var(--scoreboard)",
+        background: "rgba(0,0,0,0.5)",
+        border: "1px solid rgba(255,185,55,0.15)",
         padding: "2px 8px",
         borderRadius: "4px",
         fontVariantNumeric: "tabular-nums",
+        textShadow: "0 0 8px rgba(255,185,55,0.4)",
       }}>
         {item.score}
       </span>
