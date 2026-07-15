@@ -3,6 +3,7 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import SolanaProvider from "@/components/providers/SolanaProvider";
+import { PitchLines } from "@/components/ui/Stadium";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${inter.variable} antialiased`} style={{ background: "var(--bg)", color: "var(--text)" }}>
+        <PitchLines />
         <SolanaProvider>
           {children}
         </SolanaProvider>
