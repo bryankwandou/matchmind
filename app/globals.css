@@ -122,6 +122,13 @@ body::before {
   color: var(--green);
 }
 
+/* Decorative layers (hero globe, ticker marquee, pitch markings) may extend
+   past the viewport; clip instead of letting the page scroll sideways.
+   `clip` rather than `hidden` so no new scroll container is created. */
+html, body {
+  overflow-x: clip;
+}
+
 /* Ticket stub — pricing cards as match tickets: notched sides where the
    perforation would be torn, plus a dashed tear line. Anchored a fixed
    distance from the bottom so it always sits just above the pay button. */
