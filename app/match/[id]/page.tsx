@@ -9,7 +9,7 @@ import MomentMint from "@/components/match/MomentMint";
 import PredictionStreak from "@/components/match/PredictionStreak";
 import ShareCard from "@/components/match/ShareCard";
 import type { Moment } from "@/lib/moments";
-import { agentFor } from "@/lib/booth";
+import { agentFor, BOOTH } from "@/lib/booth";
 
 type MatchEvent = {
   id: string;
@@ -648,9 +648,20 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                   <div key={c} style={{ width: "9px", height: "9px", borderRadius: "50%", background: c }} />
                 ))}
               </div>
-              <span style={{ fontSize: "11px", color: "var(--text-3)", flex: 1, textAlign: "center" }}>
-                MatchMind · live read
-              </span>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                {Object.values(BOOTH).map((ag) => (
+                  <span key={ag.id} title={`${ag.name} — ${ag.beat}`} style={{
+                    display: "inline-flex", alignItems: "center", gap: "4px",
+                    padding: "2px 8px", borderRadius: "100px",
+                    border: `1px solid color-mix(in srgb, ${ag.color} 35%, transparent)`,
+                    background: `color-mix(in srgb, ${ag.color} 8%, transparent)`,
+                    fontSize: "9px", fontWeight: 800, color: ag.color, letterSpacing: "0.06em",
+                  }}>
+                    <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: ag.color }} />
+                    {ag.name.toUpperCase()}
+                  </span>
+                ))}
+              </div>
               <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                 <ShareCard data={{
                   homeTeam: match.homeTeam,
