@@ -9,6 +9,7 @@ import MomentMint from "@/components/match/MomentMint";
 import PredictionStreak from "@/components/match/PredictionStreak";
 import ShareCard from "@/components/match/ShareCard";
 import type { Moment } from "@/lib/moments";
+import { agentFor } from "@/lib/booth";
 
 type MatchEvent = {
   id: string;
@@ -25,6 +26,7 @@ type CommentaryMessage = {
   eventType?: string;
   minute?: number;
   aiStyle?: "analyst" | "casual" | "stats";
+  question?: string; // the fan question this read answers, if any — routes it to the right agent
   timestamp: number;
 };
 
@@ -221,20 +223,23 @@ function CommentaryBubble({ msg, moment }: { msg: CommentaryMessage; moment?: Mo
         </div>
       ) : (
         <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-          <div style={{
+          {(() => { const ag = agentFor({ eventType: msg.eventType, question: msg.question }); return (
+          <div title={`${ag.name} — ${ag.beat}`} style={{
             width: "22px",
             height: "22px",
             borderRadius: "6px",
-            background: "linear-gradient(135deg, var(--green), #00c4ff)",
+            background: `color-mix(in srgb, ${ag.color} 22%, var(--bg-3))`,
+            border: `1px solid color-mix(in srgb, ${ag.color} 55%, transparent)`,
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: "9px",
             fontWeight: 900,
-            color: "#000",
-            boxShadow: "0 0 8px rgba(0,232,122,0.3)",
-          }}>M</div>
+            color: ag.color,
+            boxShadow: `0 0 8px color-mix(in srgb, ${ag.color} 35%, transparent)`,
+          }}>{ag.initial}</div>
+          ); })()}
           <div style={{
             flex: 1,
             padding: "8px 12px",
@@ -242,6 +247,9 @@ function CommentaryBubble({ msg, moment }: { msg: CommentaryMessage; moment?: Mo
             background: "var(--bg-3)",
             border: "1px solid var(--border)",
           }}>
+            {(() => { const ag = agentFor({ eventType: msg.eventType, question: msg.question }); return (
+              <p style={{ fontSize: "9px", fontWeight: 800, color: ag.color, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "3px" }}>{ag.name}</p>
+            ); })()}
             <p style={{ fontSize: "12px", color: "var(--text-2)", lineHeight: 1.6 }}>{msg.content}</p>
             {moment && (
               <div style={{ marginTop: "8px" }}>
@@ -363,6 +371,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
       setCommentary((prev) => [...prev, {
         role: "ai",
         content: data.commentary ?? "No response.",
+        question: q,
         timestamp: Date.now(),
       }]);
     } catch {
