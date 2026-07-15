@@ -4,6 +4,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
 import { hitMilestone } from "@/lib/streakBadge";
+import { divisionFor, nextDivision } from "@/lib/career";
 import StreakBadge from "./StreakBadge";
 import RoastCard from "./RoastCard";
 
@@ -155,11 +156,30 @@ export default function PredictionStreak({
         justifyContent: "space-between",
       }}>
         <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-2)" }}>CALL IT BEFORE KICKOFF</span>
-        <span style={{
-          fontSize: "10px", fontWeight: 800, color: streak.count > 0 ? "var(--orange)" : "var(--text-3)",
-          display: "flex", alignItems: "center", gap: "4px",
-        }}>
-          STREAK {streak.count} · BEST {streak.best}
+        <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {(() => { const div = divisionFor(streak.best); return (
+            <span title={`Division: ${div.name} — best streak ${streak.best}. Next gate: ${nextDivision(streak.best)?.minBest ?? "top"}`} style={{
+              display: "inline-flex", alignItems: "center", gap: "5px",
+              padding: "2px 8px", borderRadius: "5px",
+              border: `1px solid color-mix(in srgb, ${div.color} 45%, transparent)`,
+              background: `color-mix(in srgb, ${div.color} 10%, transparent)`,
+              fontSize: "9px", fontWeight: 900, color: div.color, letterSpacing: "0.06em",
+            }}>
+              <span style={{
+                width: "12px", height: "13px", display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: `color-mix(in srgb, ${div.color} 25%, transparent)`,
+                clipPath: "polygon(50% 0, 100% 25%, 100% 70%, 50% 100%, 0 70%, 0 25%)",
+                fontSize: "7px",
+              }}>{div.short}</span>
+              {div.name.toUpperCase()}
+            </span>
+          ); })()}
+          <span style={{
+            fontSize: "10px", fontWeight: 800, color: streak.count > 0 ? "var(--orange)" : "var(--text-3)",
+            display: "flex", alignItems: "center", gap: "4px",
+          }}>
+            STREAK {streak.count} · BEST {streak.best}
+          </span>
         </span>
       </div>
 
