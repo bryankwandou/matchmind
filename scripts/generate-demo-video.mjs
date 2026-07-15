@@ -36,8 +36,8 @@ const OUT_DIR  = "E:\\Download";
 const TMP_DIR  = path.join(OUT_DIR, "_mm_tmp");
 const RAW_WEBM = path.join(OUT_DIR, "_mm_raw.webm");
 const SRT_FILE = path.join(OUT_DIR, "matchmind-subtitles.srt");
-const OUT_V1   = path.join(OUT_DIR, "matchmind-demo-v8-8k-music-only.mp4");
-const OUT_V2   = path.join(OUT_DIR, "matchmind-demo-v8-8k-subtitled.mp4");
+const OUT_V1   = path.join(OUT_DIR, "matchmind-demo-v9-arena-8k-music-only.mp4");
+const OUT_V2   = path.join(OUT_DIR, "matchmind-demo-v9-arena-8k-subtitled.mp4");
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -65,23 +65,23 @@ function buildCues(a, b) {
     /* 2  hero  */    "MatchMind puts live scores, consensus odds from fifty-plus\nbookmakers, and AI-written match notes all in one place.",
     /* 3  hero  */    "The landing page loads instantly. Every part of the product\nworks without a login or an account.",
     /* 4  steps */    "Four steps: pick your team and tone, hook into the feed,\nlet moments trigger a read, track it your way.",
-    /* 5  chain */    "Scroll on and the on-chain layer is the headline, not a\nfootnote — streaks, minted moments, a real Solana payment.",
+    /* 5  chain */    "Scroll past the commentary — a booth of three agents,\nthen streaks, minted moments, and a real Solana payment.",
     /* 6  list  */    "The match list pulls directly from the TxLINE feed —\nlive scores update in real time, no page reload needed.",
     /* 7  list  */    "Cards pulse for matches currently in play. Each one shows\nthe current minute and the odds from the market.",
     /* 8  filt  */    "Filter tabs switch between all matches,\nlive only, upcoming, or finished fixtures.",
     /* 9  A nav */    `Opening ${aName} — ${aScore}, live right now.\nReal TxLINE data, streaming as we record.`,
-    /* 10 A pan */    "The left panel is the AI commentary feed. The right panel\nshows the scoreboard and every event since kickoff.",
+    /* 10 A pan */    "The left panel is the booth — each read signed by the agent\nwhose beat it is. The right panel is the live scoreboard.",
     /* 11 A evt */    "Click any event in the timeline and a written note\nappears in about a second and a half.",
     /* 12 A gnd */    "The AI reads only the facts the live feed provides.\nIt will not invent a player name or a made-up statistic.",
     /* 13 mint  */    "Every read can become a signed record — Mint moment writes\nthe score, minute, and price to Solana, wallet-signed.",
     /* 14 ask   */    "You can also ask it a question directly. It answers\nin plain language, grounded in what is on the pitch.",
     /* 15 B nav */    `Here is a second fixture: ${bName}.\nOdds and event log come straight from the same feed.`,
-    /* 16 streak*/    "Before kickoff, call the one-X-two against the live line.\nGet it right and a streak builds — miss it, and it resets.",
+    /* 16 streak*/    "Before kickoff, call the one-X-two against the live line.\nA streak builds and climbs a division ladder — a miss resets it.",
     /* 17 poiss */    "Where the book has no live price yet, MatchMind derives one\nfrom score and time remaining with a Poisson model.",
     /* 18 wallet*/    "Connect a Solana wallet to link the on-chain layer.\nThe wallet panel explains exactly what linking does.",
     /* 19 pay   */    "On the pricing page, Grab a pass does something real —\na USDC payment on Solana, confirmed on-chain and receipted.",
     /* 20 close */    "MatchMind — live data, grounded AI, a streak worth\ndefending, built on Solana.",
-    /* 21 close */    "matchmind-omega.vercel.app\ngithub.com/nayrbryanGaming/matchmind",
+    /* 21 close */    "matchmind-omega.vercel.app\ngithub.com/bryankwandou/matchmind",
   ];
 }
 
