@@ -110,6 +110,7 @@ export default function PricingPage() {
             return (
               <motion.div
                 key={tier}
+                className="ticket-stub"
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}

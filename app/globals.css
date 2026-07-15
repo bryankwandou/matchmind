@@ -122,6 +122,32 @@ body::before {
   color: var(--green);
 }
 
+/* Ticket stub — pricing cards as match tickets: notched sides where the
+   perforation would be torn, plus a dashed tear line. Anchored a fixed
+   distance from the bottom so it always sits just above the pay button. */
+.ticket-stub {
+  --notch: 11px;
+  --tear: 78px; /* distance of the perforation from the card bottom — sits in the gap between the coupon row and the pay button */
+  clip-path: polygon(
+    0 0, 100% 0,
+    100% calc(100% - var(--tear) - var(--notch)),
+    calc(100% - var(--notch)) calc(100% - var(--tear)),
+    100% calc(100% - var(--tear) + var(--notch)),
+    100% 100%, 0 100%,
+    0 calc(100% - var(--tear) + var(--notch)),
+    var(--notch) calc(100% - var(--tear)),
+    0 calc(100% - var(--tear) - var(--notch))
+  );
+  position: relative;
+}
+.ticket-stub::after {
+  content: "";
+  position: absolute;
+  left: 20px; right: 20px; bottom: var(--tear);
+  border-top: 2px dashed var(--border-2);
+  pointer-events: none;
+}
+
 @keyframes live-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.2; }

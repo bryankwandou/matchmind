@@ -549,14 +549,20 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
               <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Home</p>
             </div>
 
-            {/* Score */}
+            {/* Score — stadium LED board */}
             <div style={{ textAlign: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ fontSize: "48px", fontWeight: 900, color: "var(--green)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: "14px",
+                padding: "10px 22px", borderRadius: "10px",
+                background: "rgba(0,0,0,0.45)",
+                border: "1px solid rgba(255,185,55,0.18)",
+                boxShadow: "inset 0 2px 10px rgba(0,0,0,0.6)",
+              }}>
+                <span style={{ fontSize: "48px", fontWeight: 900, color: "var(--scoreboard)", fontVariantNumeric: "tabular-nums", lineHeight: 1, textShadow: "0 0 18px rgba(255,185,55,0.45)" }}>
                   {match.homeScore}
                 </span>
-                <span style={{ fontSize: "24px", color: "var(--text-3)", fontWeight: 300 }}>—</span>
-                <span style={{ fontSize: "48px", fontWeight: 900, color: "var(--green)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+                <span style={{ fontSize: "24px", color: "rgba(255,185,55,0.4)", fontWeight: 300 }}>—</span>
+                <span style={{ fontSize: "48px", fontWeight: 900, color: "var(--scoreboard)", fontVariantNumeric: "tabular-nums", lineHeight: 1, textShadow: "0 0 18px rgba(255,185,55,0.45)" }}>
                   {match.awayScore}
                 </span>
               </div>
