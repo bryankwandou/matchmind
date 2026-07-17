@@ -566,7 +566,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
             {/* Home */}
             <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "14px" }}>
-              {flagUrl(match.homeCode) && (<img src={flagUrl(match.homeCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
+              {flagUrl(match.homeTeam, match.homeCode) && (<img src={flagUrl(match.homeTeam, match.homeCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
               <div>
                 <p style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)" }}>
                   {match.homeTeam}
@@ -627,7 +627,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                 </p>
                 <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Away</p>
               </div>
-              {flagUrl(match.awayCode) && (<img src={flagUrl(match.awayCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
+              {flagUrl(match.awayTeam, match.awayCode) && (<img src={flagUrl(match.awayTeam, match.awayCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
             </div>
           </div>
         </motion.div>
