@@ -224,7 +224,25 @@ export default function MatchListPage() {
     fetch("/api/matches")
       .then((r) => r.json())
       .then((data) => {
-        setMatches(data.matches ?? data);
+        const live: Match[] = data.matches ?? data;
+        // TxLINE's fixtures/snapshot only carries the upcoming and in-play
+        // slate — settled ties leave the feed. Keep a client-side archive of
+        // every fixture this browser has seen; anything that has left the
+        // feed after its start time shows under FINISHED with the last
+        // score we saw for it.
+        const KEY = "mm_fixture_archive";
+        let archive: Record<string, Match & { seenAt: number }> = {};
+        try { archive = JSON.parse(localStorage.getItem(KEY) ?? "{}"); } catch {}
+        const now = Date.now();
+        for (const m of live) archive[m.id] = { ...m, seenAt: now };
+        try { localStorage.setItem(KEY, JSON.stringify(archive)); } catch {}
+        const liveIds = new Set(live.map((m) => m.id));
+        const settled = Object.values(archive).filter((m) =>
+          // Absent from the feed for 2.5h+ means the tie has wrapped up —
+          // the snapshot drops fixtures once they settle.
+          !liveIds.has(m.id) && now - m.seenAt > 2.5 * 60 * 60 * 1000
+        ).map((m) => ({ ...m, status: "finished" as const }));
+        setMatches([...live, ...settled]);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -338,8 +356,10 @@ export default function MatchListPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-3)", fontSize: "14px" }}>
-Nothing here under that filter.
+          <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-3)", fontSize: "14px", maxWidth: "460px", margin: "0 auto", lineHeight: 1.7 }}>
+            {filter === "finished"
+              ? "Nothing settled yet on this device. The TxLINE snapshot carries the upcoming and in-play slate — once a tie you've seen here wraps up and leaves the feed, it stays on this tab with the last score we caught."
+              : "Nothing here under that filter."}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
