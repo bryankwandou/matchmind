@@ -41,7 +41,7 @@ export default function Footer() {
           <Link001 href="https://txline.txodds.com" className="footer-link">
             TxLINE feed
           </Link001>
-          <Link002 href="https://github.com/nayrbryanGaming/matchmind" className="footer-link">
+          <Link002 href="https://github.com/bryankwandou/matchmind" className="footer-link">
             Source on GitHub
           </Link002>
           <Link003 href="https://solana.com" className="footer-link">

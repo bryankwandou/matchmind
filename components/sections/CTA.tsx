@@ -132,7 +132,7 @@ No account. No card. Tap a tie that is already underway and follow it from the v
               </motion.span>
             </MagneticButton>
 
-            <MagneticButton href="https://github.com/nayrbryanGaming/matchmind" strength={0.3}>
+            <MagneticButton href="https://github.com/bryankwandou/matchmind" strength={0.3}>
               <motion.span
                 whileHover={{ borderColor: "var(--border-2)", color: "var(--text)" }}
                 style={{
