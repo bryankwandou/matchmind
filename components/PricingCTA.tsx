@@ -52,7 +52,7 @@ export default function PricingCTA({
 
   async function pay() {
     if (!connected || !publicKey) {
-      setState({ phase: "error", tone: "hint", message: "Link a wallet up top first — this button sends a real USDC transfer." });
+      setState({ phase: "error", tone: "hint", message: "Use Connect wallet in the top bar first — this button sends a real USDC transfer." });
       return;
     }
     if (state.phase === "paying") return;
