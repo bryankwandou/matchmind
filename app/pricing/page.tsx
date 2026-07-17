@@ -20,19 +20,18 @@ type CouponResult = {
 };
 
 const COMPARISON: { row: string; free: string; fan: string; tour: string }[] = [
-  { row: "Live ties per day", free: "Three", fan: "No cap", tour: "No cap" },
-  { row: "Read delay", free: "60 seconds", fan: "None", tour: "None, front of queue" },
-  { row: "Tone of voice", free: "Analyst only", fan: "Analyst, casual, stats", tour: "All three" },
-  { row: "Price-drift pings", free: "—", fan: "Included", tour: "Included" },
-  { row: "Full event timeline", free: "—", fan: "Included", tour: "Included" },
-  { row: "Match replay archive", free: "—", fan: "—", tour: "Any past match" },
-  { row: "Alert rules", free: "—", fan: "—", tour: "Set your own" },
-  { row: "API access", free: "—", fan: "—", tour: "Beta keys" },
+  { row: "Live ties", free: "All 104, no cap", fan: "All 104, no cap", tour: "All 104, no cap" },
+  { row: "Booth voices", free: "Analyst only", fan: "Analyst, casual, stats", tour: "All three" },
+  { row: "On-chain payment receipt", free: "—", fan: "Explorer link, kept", tour: "Explorer link, kept" },
+  { row: "Pass duration", free: "—", fan: "6 hours (one match)", tour: "45 days (whole run)" },
+  { row: "Price-drift pings", free: "—", fan: "Planned next", tour: "Planned next" },
+  { row: "Match replay archive", free: "—", fan: "—", tour: "Planned next" },
+  { row: "API access", free: "—", fan: "—", tour: "Beta keys, planned" },
 ];
 
 const WHY = [
-  { title: "No delay, no guessing", body: "Free reads are held back 60 seconds — long enough for the price to already reflect the moment. A pass removes the hold entirely." },
-  { title: "The full timeline, not the highlights", body: "Free shows the headline events. A pass shows every substitution, card, and VAR check the feed carries, in order." },
+  { title: "Three voices instead of one", body: "Free gets the analyst read. A pass unlocks the casual and stats-first voices — the same grounded facts, told the way you like hearing them. The toggle sits on every match page." },
+  { title: "A receipt, not a subscription", body: "Your payment is a Solana transaction you can open on the explorer any time. The pass lives in your wallet's history, not in an account we hold over you." },
   { title: "Priced in a currency that doesn't move", body: "USDC tracks the dollar 1:1, so the price you see is the price you pay — no separate SOL conversion step to second-guess." },
 ];
 
