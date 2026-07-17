@@ -168,7 +168,7 @@ npm run dev
 # → http://localhost:3000
 ```
 
-The app runs in demo mode without `TXLINE_API_KEY` — mock data mirrors TxLINE's exact response shape.
+A local clone without `TXLINE_API_KEY` falls back to demo mode — mock data mirrors TxLINE's exact response shape so the code paths stay testable. **The deployed site at matchmind-omega.vercel.app does not run in demo mode**: production carries live `TXLINE_API_KEY` and `GROQ_API_KEY`, every fixture and price on it comes from the TxLINE feed, and mock responses are tagged `"source": "mock"` — you will not find that tag on the live API.
 
 ---
 
