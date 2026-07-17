@@ -68,7 +68,10 @@ export default function Navigation() {
               href={
                 label === "Live matches" ? "/match" :
                 label === "Pricing" ? "/pricing" :
-                `#${label.toLowerCase().replace(/\s+/g, "-")}`
+                // Anchor-to-home: bare "#features" only works on the landing
+                // page; the leading "/" routes there first from /match, /pricing,
+                // or anywhere else, then scrolls to the section.
+                `/#${label.toLowerCase().replace(/\s+/g, "-")}`
               }
               style={{
                 fontSize: "14px",
