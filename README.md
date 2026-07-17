@@ -100,6 +100,8 @@ Commentary is the entry point; the product is the accountability layer on top. T
 
 USDC mint addresses are Circle's official ones — devnet `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`, mainnet `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`. Because the price is a dollar figure, USDC (1:1 peg) means the quoted price is the paid price — no conversion step. Devnet USDC comes from [Circle's faucet](https://faucet.circle.com/); the app links it automatically when a wallet is short.
 
+**Verify it yourself, on-chain:** every mint and payment in the app surfaces its transaction signature with a direct [Solana Explorer](https://explorer.solana.com/?cluster=devnet) link the moment it confirms — the receipt panel keeps the signature after a payment, and each minted moment/badge links straight to its transaction. The devnet USDC mint the checkout uses is [`4zMMC9...DncDU`](https://explorer.solana.com/address/4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU?cluster=devnet). Nothing needs to be taken on faith: connect a devnet wallet, pay, and follow the link the app hands you.
+
 ---
 
 ## Tech Stack
