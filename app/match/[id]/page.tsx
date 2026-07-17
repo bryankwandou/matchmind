@@ -5,6 +5,7 @@ import { useRef, useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loadReceipt } from "@/lib/fanPass";
+import { flagUrl } from "@/lib/flags";
 import Navigation from "@/components/Navigation";
 import { AuroraBackground, SpotlightGrid } from "@/components/ui/AuroraBackground";
 import MomentMint from "@/components/match/MomentMint";
@@ -36,6 +37,8 @@ type MatchData = {
   id: string;
   homeTeam: string;
   awayTeam: string;
+  homeCode?: string;
+  awayCode?: string;
   homeScore: number;
   awayScore: number;
   minute: number;
@@ -403,6 +406,8 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           id: m.id,
           homeTeam: m.homeTeam,
           awayTeam: m.awayTeam,
+          homeCode: m.homeCode,
+          awayCode: m.awayCode,
           homeScore: m.homeScore,
           awayScore: m.awayScore,
           minute: m.minute,
@@ -560,11 +565,14 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
             {/* Home */}
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)" }}>
-                {match.homeTeam}
-              </p>
-              <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Home</p>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "14px" }}>
+              {flagUrl(match.homeCode) && (<img src={flagUrl(match.homeCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
+              <div>
+                <p style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)" }}>
+                  {match.homeTeam}
+                </p>
+                <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Home</p>
+              </div>
             </div>
 
             {/* Score — stadium LED board */}
@@ -612,11 +620,14 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* Away */}
-            <div style={{ flex: 1, textAlign: "right" }}>
-              <p style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)" }}>
-                {match.awayTeam}
-              </p>
-              <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Away</p>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "14px" }}>
+              <div style={{ textAlign: "right" }}>
+                <p style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)" }}>
+                  {match.awayTeam}
+                </p>
+                <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "3px" }}>Away</p>
+              </div>
+              {flagUrl(match.awayCode) && (<img src={flagUrl(match.awayCode, 80)!} alt="" aria-hidden width={44} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
             </div>
           </div>
         </motion.div>
