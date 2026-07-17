@@ -2,7 +2,9 @@
 
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { loadReceipt } from "@/lib/fanPass";
 import Navigation from "@/components/Navigation";
 import { AuroraBackground, SpotlightGrid } from "@/components/ui/AuroraBackground";
 import MomentMint from "@/components/match/MomentMint";
@@ -268,6 +270,13 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
   const [match, setMatch] = useState<MatchData | null>(null);
   const [commentary, setCommentary] = useState<CommentaryMessage[]>([]);
   const [aiStyle, setAiStyle] = useState<"analyst" | "casual" | "stats">("analyst");
+  const router = useRouter();
+  // Pass state gates the paid voices. localStorage is client-only, so it must
+  // hydrate in an effect; loadReceipt() already enforces expiry.
+  const [hasPass, setHasPass] = useState(false);
+  useEffect(() => {
+    setHasPass(loadReceipt() !== null);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const [liveConnected, setLiveConnected] = useState(false);
@@ -674,25 +683,32 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
                   odds: { home: match.homeOdds, draw: match.drawOdds, away: match.awayOdds },
                   read: [...commentary].reverse().find((m) => m.role === "ai")?.content ?? "",
                 }} />
-                {AI_STYLE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setAiStyle(opt.value)}
-                    style={{
-                      padding: "3px 9px",
-                      borderRadius: "5px",
-                      border: "1px solid",
-                      borderColor: aiStyle === opt.value ? "var(--green)55" : "var(--border)",
-                      background: aiStyle === opt.value ? "var(--green-dim)" : "transparent",
-                      color: aiStyle === opt.value ? "var(--green)" : "var(--text-3)",
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                {AI_STYLE_OPTIONS.map((opt) => {
+                  // Analyst is the free voice; Casual and Stats-first are what a
+                  // pass actually buys — the gate is enforced here, not implied.
+                  const locked = opt.value !== "analyst" && !hasPass;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => (locked ? router.push("/pricing") : setAiStyle(opt.value))}
+                      title={locked ? "Fan Pass voice — tap to see pricing" : undefined}
+                      style={{
+                        padding: "3px 9px",
+                        borderRadius: "5px",
+                        border: "1px solid",
+                        borderColor: aiStyle === opt.value ? "var(--green)55" : "var(--border)",
+                        background: aiStyle === opt.value ? "var(--green-dim)" : "transparent",
+                        color: aiStyle === opt.value ? "var(--green)" : locked ? "var(--text-3)" : "var(--text-3)",
+                        opacity: locked ? 0.55 : 1,
+                        fontSize: "10px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {locked ? `${opt.label} · pass` : opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
