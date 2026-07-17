@@ -25,6 +25,8 @@ export type CommentaryRequest = {
     score: { home: number; away: number };
     minute: number;
     competition: string;
+    kickoff?: string; // ISO start time, lets the AI answer kickoff/timezone questions
+    status?: string;
   };
   userTeam?: string;
   language?: string;
@@ -56,6 +58,8 @@ export async function generateCommentary(req: CommentaryRequest): Promise<string
     `Score: ${matchContext.homeTeam} ${matchContext.score.home}, ${matchContext.awayTeam} ${matchContext.score.away}`,
     `Clock: ${event.minute}'`,
     `Competition: ${matchContext.competition}`,
+    matchContext.status ? `Status: ${matchContext.status}` : "",
+    matchContext.kickoff ? `Kickoff (UTC): ${matchContext.kickoff}` : "",
     event.detail && !isQuestion ? `Latest event: ${event.type.replace(/_/g, " ")} — ${event.player || "unknown"} (${event.team})` : "",
     oddsContext,
   ].filter(Boolean).join("\n");
@@ -64,6 +68,7 @@ export async function generateCommentary(req: CommentaryRequest): Promise<string
   const guard = `Ground rules:
 - Use only the facts in KNOWN below. Do not invent player names, minutes, cards, or stats that are not listed. The feed gives team scores, not per-player breakdowns, so if you are asked which player did something and it is not in KNOWN, say the feed does not name individual scorers.
 - If a request asks you to insult, mock, or demean anyone, decline in one short line and offer a factual read instead.
+- The Kickoff time in KNOWN is UTC. If asked when the match starts in a place or timezone, convert it and give the local time — this is arithmetic, not a guess.
 - Reply in the same language the user wrote in.
 - No emojis. No hype words. Lead with the fact, then what it means.`;
 

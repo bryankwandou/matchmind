@@ -87,6 +87,9 @@ export async function POST(req: NextRequest) {
       score,
       minute: typeof ctx.minute === "number" ? ctx.minute : (ev.minute as number),
       competition: sanitize(ctx.competition) || "FIFA World Cup 2026",
+      kickoff: typeof ctx.startTime === "string" ? ctx.startTime
+        : typeof ctx.kickoff === "string" ? ctx.kickoff : undefined,
+      status: sanitize(ctx.status, 20) || undefined,
     },
     userTeam: sanitize(b.userTeam),
     language: sanitize(b.language, 20),

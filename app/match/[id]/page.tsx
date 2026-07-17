@@ -44,6 +44,7 @@ type MatchData = {
   minute: number;
   status: "live" | "pre" | "finished";
   stage: string;
+  startTime?: string;
   homeOdds: number;
   awayOdds: number;
   drawOdds: number;
@@ -321,6 +322,8 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             score: { home: match.homeScore, away: match.awayScore },
             minute: match.minute,
             competition: match.stage,
+            startTime: match.startTime,
+            status: match.status,
           },
           pundtStyle: aiStyle,
         }),
@@ -375,6 +378,8 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
             score: { home: match.homeScore, away: match.awayScore },
             minute: match.minute,
             competition: match.stage,
+            startTime: match.startTime,
+            status: match.status,
           },
           pundtStyle: aiStyle,
         }),
@@ -413,6 +418,7 @@ export default function MatchPage({ params }: { params: Promise<{ id: string }> 
           minute: m.minute,
           status: m.status,
           stage: m.stage,
+          startTime: m.startTime,
           homeOdds: m.homeOdds ?? 0,
           awayOdds: m.awayOdds ?? 0,
           drawOdds: m.drawOdds ?? 0,
