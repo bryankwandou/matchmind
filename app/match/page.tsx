@@ -151,7 +151,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
           {/* Score row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px" }}>
-              {flagUrl(match.homeCode) && (<img src={flagUrl(match.homeCode, 80)!} alt="" aria-hidden width={28} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
+              {flagUrl(match.homeTeam, match.homeCode) && (<img src={flagUrl(match.homeTeam, match.homeCode, 80)!} alt="" aria-hidden width={28} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
               <p style={{ fontSize: "15px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
                 {match.homeTeam}
               </p>
@@ -180,7 +180,7 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
               <p style={{ fontSize: "15px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em" }}>
                 {match.awayTeam}
               </p>
-              {flagUrl(match.awayCode) && (<img src={flagUrl(match.awayCode, 80)!} alt="" aria-hidden width={28} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
+              {flagUrl(match.awayTeam, match.awayCode) && (<img src={flagUrl(match.awayTeam, match.awayCode, 80)!} alt="" aria-hidden width={28} style={{ borderRadius: "3px", boxShadow: "0 1px 4px rgba(0,0,0,0.5)", display: "block" }} />)}
             </div>
           </div>
 
