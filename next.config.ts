@@ -17,7 +17,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires these
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://flagcdn.com", // country flags for match cards
       "connect-src 'self' https://txline.txodds.com https://api.groq.com https://api.devnet.solana.com wss://api.devnet.solana.com",
       "frame-ancestors 'none'",
     ].join("; "),
