@@ -102,6 +102,8 @@ USDC mint addresses are Circle's official ones — devnet `4zMMC9srt5Ri5X14GAgXh
 
 **Verify it yourself, on-chain:** every mint and payment in the app surfaces its transaction signature with a direct [Solana Explorer](https://explorer.solana.com/?cluster=devnet) link the moment it confirms — the receipt panel keeps the signature after a payment, and each minted moment/badge links straight to its transaction. The devnet USDC mint the checkout uses is [`4zMMC9...DncDU`](https://explorer.solana.com/address/4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU?cluster=devnet). Nothing needs to be taken on faith: connect a devnet wallet, pay, and follow the link the app hands you.
 
+**Live example receipt** (click it — this is a real confirmed devnet transaction in the exact shape Mint moment writes): [`54pEbG76...PfRiKD`](https://explorer.solana.com/tx/54pEbG76HtnP4fYSRspu6ZvrZZTrsG64x8yFYDMA1wLxXAerEWquUyU3fc9kvYKG897tq4T36kMv281h4tPfRiKD?cluster=devnet). Open the Memo instruction and you'll find the fixture, score, minute, and the odds at that second, exactly as described above.
+
 ---
 
 ## Tech Stack
