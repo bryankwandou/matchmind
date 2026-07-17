@@ -142,7 +142,11 @@ export default function PricingPage() {
                 <div style={{ display: "flex", gap: "6px", marginBottom: "16px" }}>
                   <input
                     value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value)}
+                    onChange={(e) => {
+                      setCouponInput(e.target.value);
+                      // A stale validation message must not outlive the code it judged.
+                      setCouponResults({ fan_pass: null, tournament: null });
+                    }}
                     placeholder="Coupon code"
                     style={{
                       flex: 1, padding: "8px 10px", borderRadius: "7px",

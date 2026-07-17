@@ -18,7 +18,7 @@ import { IS_DEVNET, USDC_FAUCET_URL } from "@/lib/network";
 type PayState =
   | { phase: "idle" }
   | { phase: "paying"; step: string }
-  | { phase: "error"; message: string; needsFaucet?: boolean };
+  | { phase: "error"; message: string; needsFaucet?: boolean; tone?: "hint" };
 
 export default function PricingCTA({
   tier,
@@ -52,7 +52,7 @@ export default function PricingCTA({
 
   async function pay() {
     if (!connected || !publicKey) {
-      setState({ phase: "error", message: "Connect a wallet above to buy a pass." });
+      setState({ phase: "error", tone: "hint", message: "Link a wallet up top first — this button sends a real USDC transfer." });
       return;
     }
     if (state.phase === "paying") return;
@@ -161,7 +161,7 @@ export default function PricingCTA({
             exit={{ opacity: 0 }}
             style={{ marginTop: "6px", textAlign: "center" }}
           >
-            <p style={{ fontSize: "10px", color: "var(--red)" }}>{state.message}</p>
+            <p style={{ fontSize: "10px", color: state.tone === "hint" ? "var(--gold)" : "var(--red)" }}>{state.message}</p>
             {state.needsFaucet && (
               <a
                 href={USDC_FAUCET_URL}

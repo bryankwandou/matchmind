@@ -130,27 +130,29 @@ html, body {
 }
 
 /* Ticket stub — pricing cards as match tickets: notched sides where the
-   perforation would be torn, plus a dashed tear line. Anchored a fixed
-   distance from the bottom so it always sits just above the pay button. */
+   perforation would be torn, plus a dashed tear line. Anchored from the TOP,
+   inside the fixed-height price block: content below the line (coupon
+   feedback, wallet hints) grows and shrinks, so a bottom anchor drifted the
+   perforation onto the pay button whenever a message appeared. */
 .ticket-stub {
   --notch: 11px;
-  --tear: 78px; /* distance of the perforation from the card bottom — sits in the gap between the coupon row and the pay button */
+  --tear-top: 148px; /* just below label + price + billing line, which never change height */
   clip-path: polygon(
     0 0, 100% 0,
-    100% calc(100% - var(--tear) - var(--notch)),
-    calc(100% - var(--notch)) calc(100% - var(--tear)),
-    100% calc(100% - var(--tear) + var(--notch)),
+    100% calc(var(--tear-top) - var(--notch)),
+    calc(100% - var(--notch)) var(--tear-top),
+    100% calc(var(--tear-top) + var(--notch)),
     100% 100%, 0 100%,
-    0 calc(100% - var(--tear) + var(--notch)),
-    var(--notch) calc(100% - var(--tear)),
-    0 calc(100% - var(--tear) - var(--notch))
+    0 calc(var(--tear-top) + var(--notch)),
+    var(--notch) var(--tear-top),
+    0 calc(var(--tear-top) - var(--notch))
   );
   position: relative;
 }
 .ticket-stub::after {
   content: "";
   position: absolute;
-  left: 20px; right: 20px; bottom: var(--tear);
+  left: 20px; right: 20px; top: var(--tear-top);
   border-top: 2px dashed var(--border-2);
   pointer-events: none;
 }
