@@ -152,7 +152,7 @@ User browser
 ## Local Development
 
 ```bash
-git clone https://github.com/nayrbryanGaming/matchmind
+git clone https://github.com/bryankwandou/matchmind
 cd matchmind
 npm install
 
@@ -171,6 +171,6 @@ The app runs in demo mode without `TXLINE_API_KEY` — mock data mirrors TxLINE'
 ## Submission
 
 - **Deployed URL**: https://matchmind-omega.vercel.app
-- **GitHub**: https://github.com/nayrbryanGaming/matchmind
+- **GitHub**: https://github.com/bryankwandou/matchmind
 - **Hackathon**: Superteam Earn — Consumer & Fan Experiences Track 2 ($16K)
 - **Deadline**: July 19, 2026
