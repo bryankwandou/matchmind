@@ -107,27 +107,41 @@ function MatchCard({ match, index }: { match: Match; index: number }) {
 
             <span style={{ fontSize: "11px", color: "var(--text-3)" }}>{match.stage}</span>
 
-            {/* Odds */}
+            {/* Odds — favourite in green, longest shot in red, matching the
+                CURRENT ODDS panel on the match page */}
             <div style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
-              {[
-                { label: "1", val: match.homeOdds },
-                { label: "X", val: match.drawOdds },
-                { label: "2", val: match.awayOdds },
-              ].map(({ label, val }) => (
-                <div key={label} style={{
-                  textAlign: "center",
-                  padding: "3px 8px",
-                  borderRadius: "4px",
-                  border: "1px solid var(--border)",
-                  background: "var(--bg-3)",
-                  minWidth: "40px",
-                }}>
-                  <p style={{ fontSize: "8px", color: "var(--text-3)", marginBottom: "1px" }}>{label}</p>
-                  <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-2)", fontVariantNumeric: "tabular-nums" }}>
-                    {typeof val === "number" && val > 0 ? val.toFixed(2) : "—"}
-                  </p>
-                </div>
-              ))}
+              {(() => {
+                const cells = [
+                  { label: "1", val: match.homeOdds },
+                  { label: "X", val: match.drawOdds },
+                  { label: "2", val: match.awayOdds },
+                ];
+                const nums = cells.map(c => (typeof c.val === "number" && c.val > 0 ? c.val : null));
+                const valid = nums.filter((n): n is number => n !== null);
+                const lo = valid.length ? Math.min(...valid) : null;
+                const hi = valid.length > 1 ? Math.max(...valid) : null;
+                return cells.map(({ label, val }, i) => {
+                  const n = nums[i];
+                  const isFav = n !== null && n === lo;
+                  const isLong = n !== null && n === hi && hi !== lo;
+                  const tint = isFav ? "var(--green)" : isLong ? "var(--red)" : null;
+                  return (
+                    <div key={label} style={{
+                      textAlign: "center",
+                      padding: "3px 8px",
+                      borderRadius: "4px",
+                      border: `1px solid ${tint ? `color-mix(in srgb, ${tint} 40%, var(--border))` : "var(--border)"}`,
+                      background: tint ? `color-mix(in srgb, ${tint} 9%, var(--bg-3))` : "var(--bg-3)",
+                      minWidth: "40px",
+                    }}>
+                      <p style={{ fontSize: "8px", color: "var(--text-3)", marginBottom: "1px" }}>{label}</p>
+                      <p style={{ fontSize: "11px", fontWeight: 700, color: tint ?? "var(--text-2)", fontVariantNumeric: "tabular-nums" }}>
+                        {n !== null ? n.toFixed(2) : "—"}
+                      </p>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
 
@@ -216,7 +230,16 @@ export default function MatchListPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const filtered = filter === "all" ? matches : matches.filter((m) => m.status === filter);
+  // World Cup fixtures lead; friendlies and other competitions follow. The
+  // feed carries whatever is live on TxLINE — we surface all of it, in order
+  // of what a World Cup audience came for.
+  const ranked = [...matches].sort((a, b) => {
+    const aWC = /world cup/i.test(a.stage) ? 0 : 1;
+    const bWC = /world cup/i.test(b.stage) ? 0 : 1;
+    if (aWC !== bWC) return aWC - bWC;
+    return 0;
+  });
+  const filtered = filter === "all" ? ranked : ranked.filter((m) => m.status === filter);
   const liveCount = matches.filter((m) => m.status === "live").length;
 
   return (
@@ -260,7 +283,7 @@ export default function MatchListPage() {
             )}
           </div>
           <p style={{ fontSize: "14px", color: "var(--text-3)" }}>
-            {matches.length} ties · TxLINE feed · prices off 50+ books
+            {matches.length} ties · World Cup first, live friendlies below · TxLINE feed · prices off 50+ books
           </p>
         </motion.div>
 
