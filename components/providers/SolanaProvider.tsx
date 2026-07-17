@@ -9,7 +9,10 @@ export default function SolanaProvider({ children }: { children: ReactNode }) {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={[]} autoConnect={false}>
+      {/* autoConnect: silently re-attach the last-used wallet on every page
+          load — without it, navigation dropped the session and users had to
+          reconnect on each page. */}
+      <WalletProvider wallets={[]} autoConnect>
         {children}
       </WalletProvider>
     </ConnectionProvider>
